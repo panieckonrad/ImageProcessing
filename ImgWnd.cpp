@@ -43,7 +43,7 @@ BOOL CImgWnd::Create(const RECT& rect, CWnd*  pParentWnd, UINT nID)
 
 void CImgWnd::OnPaint()
 {
-	if (!doPaint) { // TO CZASEM JEST PROBLEMATYCZNE
+	if (!doPaint) { 
 		return;
 	}
 

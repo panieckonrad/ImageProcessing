@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "MyClass.h"
 #include "Math.h"
-
+#include "HistogramDialog.h"
 using namespace std;
 
 MyClass::MyClass()
@@ -244,4 +244,30 @@ void MyClass::Negatyw() {
 			SetPixel8(x, y, Floor(255-GetPixel8(x,y)));
 		}
 	}
+}
+
+void MyClass::CalculateHistogram(int startX, int startY, int endX, int endY) {
+	histogram = new float[256];
+	for (int x = 0; x < 256; x++)
+		histogram[x] = 0;
+	int width = endX - startX;
+	int height = endY - startY;
+	int histogramCount = width * height;
+
+	for (int x = startX; x < endX; x++)
+	{
+		for (int y = startY; y < endY; y++)
+		{
+			int byteValue = GetPixel8(x, y);
+			histogram[byteValue]++;
+		}
+	}
+	for (int x = 0; x < 256; x++)
+		histogram[x] = histogram[x] / histogramCount;
+}
+
+void MyClass::ShowHistogram() {
+	HistogramDialog dialog;
+	dialog.values = histogram;
+	dialog.DoModal();
 }

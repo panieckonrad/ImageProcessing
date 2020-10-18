@@ -10,6 +10,7 @@ public:
 	DWORD sizeOfFile;
 	int typeOfImage;
 	int fileWidth = 0, fileHeight = 0;
+	float* histogram;
 
 	MyClass();
 	~MyClass();
@@ -35,5 +36,7 @@ public:
 	void ChangeKontrast(float value);
 	void ChangePotega(float value);
 	void Negatyw();
+	void CalculateHistogram(int startX, int startY, int endX, int endY);
+	void ShowHistogram();
 };
 

@@ -100,6 +100,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="HistogramDialog.h" />
     <ClInclude Include="MyClass.h" />
     <ClInclude Include="ImgWnd.h" />
     <ClInclude Include="ParamsDlg.h" />
@@ -110,6 +111,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="HistogramDialog.cpp" />
     <ClCompile Include="MyClass.cpp" />
     <ClCompile Include="ImgWnd.cpp" />
     <ClCompile Include="ParamsDlg.cpp" />
