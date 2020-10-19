@@ -126,6 +126,7 @@ BOOL CPODlg::OnInitDialog()
 	m_combo1.AddString(L"lab2_change potega");
 	m_combo1.AddString(L"lab2_negatyw");
 	m_combo1.AddString(L"lab2_wyswietlenie histogramu");
+	m_combo1.AddString(L"lab2_wyrownanie histogramu");
 	m_combo1.SelectString(0, L"lab1_convert to greyscale");
 
 
@@ -234,6 +235,11 @@ void CPODlg::OnBnClickedButtonProcess()
 	}
 	else if (sOption == L"lab2_wyswietlenie histogramu") {
 		m_imgOUT.myClass.CalculateHistogram(0, 0, m_imgOUT.myClass.fileWidth, m_imgOUT.myClass.fileHeight);
+		m_imgOUT.myClass.ShowHistogram();
+	}
+	else if (sOption == L"lab2_wyrownanie histogramu") {
+		m_imgOUT.myClass.CalculateHistogram(0, 0, m_imgOUT.myClass.fileWidth, m_imgOUT.myClass.fileHeight);
+		m_imgOUT.myClass.WyrownajHistogram();
 		m_imgOUT.myClass.ShowHistogram();
 	}
 	

@@ -38,5 +38,7 @@ public:
 	void Negatyw();
 	void CalculateHistogram(int startX, int startY, int endX, int endY);
 	void ShowHistogram();
+	void WyrownajHistogram();
+	void WygladzHistogram();
 };
 

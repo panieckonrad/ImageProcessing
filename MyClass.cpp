@@ -271,3 +271,50 @@ void MyClass::ShowHistogram() {
 	dialog.values = histogram;
 	dialog.DoModal();
 }
+
+void MyClass::WyrownajHistogram() {
+	float dystrybuanta[256] = { 0 };
+	int histogramCount = fileWidth * fileHeight;
+
+	float sum = 0;
+	for (int i = 0; i < 256; i++)
+	{
+		sum += (histogram[i] * histogramCount);
+		dystrybuanta[i] = sum;
+	}
+
+	float min = 0;
+	for (int i = 0; i < 256; i++) {
+		if (dystrybuanta[i] > 0) {
+			min = dystrybuanta[i];
+			break;
+		}
+	}
+
+	for (int x = 0; x < fileWidth; x++)
+	{
+		for (int y = 0; y < fileHeight; y++)
+		{
+			int index = y * ((fileWidth * 8 + 31) / 32) * 4 + x;
+			int byteValue = GetPixel8(x, y);
+			int newValue = ((dystrybuanta[byteValue] - min) / (float)(histogramCount - min)) * 255;
+			((BYTE*)obrazBajty)[index] = newValue;
+		}
+	}
+	CalculateHistogram(0, 0, fileWidth, fileHeight);
+}
+
+void MyClass::WygladzHistogram() {
+	int histogramCount = fileWidth * fileHeight;
+	int stopienWygladzania = 2;
+	for (int x = 0; x < 256; x++) {
+		float sum = 0;
+		for (int i = -stopienWygladzania; i < stopienWygladzania; i++) {
+			if (x + i < 0 || x + i > 255)
+				continue;
+			sum += histogram[x + i];
+		}
+		sum = sum / (2 * stopienWygladzania + 1);
+		histogram[x] = sum;
+	}
+}

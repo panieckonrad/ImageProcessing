@@ -51,7 +51,7 @@ void HistogramDialog::OnPaint()
 	for (int i = 0; i < 256; i++)
 	{
 		dc.MoveTo(10 + 5 * i, r.Height() - 10);
-		float newValue = (values[i] / max) * 500;
+		float newValue = (values[i] / max ) * 500;
 		dc.LineTo(10 + 5 * i, r.Height() - 10 - newValue);
 	}
 }
