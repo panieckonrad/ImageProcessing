@@ -48,11 +48,12 @@ void CImgWnd::OnPaint()
 	}
 
 	CPaintDC dc(this); // device context for painting
+	//
 	//// Do not call CWnd::OnPaint() for painting messages
 	HDC kontekst = dc.GetSafeHdc();
 	CRect r;
 	GetClientRect(r);
 
-	myClass.PaintDIB(kontekst, r);
+	Image.PaintDIB(kontekst, r);
 
 }

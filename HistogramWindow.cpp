@@ -1,41 +1,41 @@
-// HistogramDialog.cpp : implementation file
+// HistogramWindow.cpp : implementation file
 //
 
 #include "stdafx.h"
 #include "PO1.h"
-#include "HistogramDialog.h"
+#include "HistogramWindow.h"
 #include "afxdialogex.h"
 
 
-// HistogramDialog dialog
+// HistogramWindow dialog
 
-IMPLEMENT_DYNAMIC(HistogramDialog, CDialogEx)
+IMPLEMENT_DYNAMIC(HistogramWindow, CDialogEx)
 
-HistogramDialog::HistogramDialog(CWnd* pParent /*=nullptr*/)
+HistogramWindow::HistogramWindow(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_HISTOGRAM, pParent)
 {
 
 }
 
-HistogramDialog::~HistogramDialog()
+HistogramWindow::~HistogramWindow()
 {
 }
 
-void HistogramDialog::DoDataExchange(CDataExchange* pDX)
+void HistogramWindow::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 }
 
 
-BEGIN_MESSAGE_MAP(HistogramDialog, CDialogEx)
+BEGIN_MESSAGE_MAP(HistogramWindow, CDialogEx)
 	ON_WM_PAINT()
 END_MESSAGE_MAP()
 
 
-// HistogramDialog message handlers
+// HistogramWindow message handlers
 
 
-void HistogramDialog::OnPaint()
+void HistogramWindow::OnPaint()
 {
 	CPaintDC dc(this); // device context for painting
 					   // TODO: Add your message handler code here
@@ -54,14 +54,26 @@ void HistogramDialog::OnPaint()
 		float newValue = (values[i] / max ) * 500;
 		dc.LineTo(10 + 5 * i, r.Height() - 10 - newValue);
 	}
+
+	// rysowanie progu
+	if (threshold != -1) {
+		dc.MoveTo(10 + 5 * threshold, r.Height() - 10);
+		int nsave = dc.SaveDC();
+		CPen penRed(PS_SOLID, 1, RGB(255, 0, 0));
+		dc.SelectObject(&penRed);
+		//RYSOWANIE
+		dc.LineTo(10 + 5 * threshold, r.Height() - 10 - 700);
+		////////
+		dc.RestoreDC(nsave);
+	}
 }
 
 
-BOOL HistogramDialog::OnInitDialog()
+BOOL HistogramWindow::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
-	// TODO:  Add extra initialization here
+	// TODO:  Add extra initialization here 
 	int szerokosc = 40 + 256 * 5;
 	int wysokosc = 560;
 	SetWindowPos(NULL, 0, 0, szerokosc, wysokosc, SWP_NOMOVE | SWP_NOZORDER);

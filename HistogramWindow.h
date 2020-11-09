@@ -1,18 +1,20 @@
 #pragma once
 
 
-// HistogramDialog dialog
+// HistogramWindow dialog
 
-class HistogramDialog : public CDialogEx
+class HistogramWindow : public CDialogEx
 {
-	DECLARE_DYNAMIC(HistogramDialog)
+	DECLARE_DYNAMIC(HistogramWindow)
 
 public:
-	HistogramDialog(CWnd* pParent = nullptr);   // standard constructor
-	virtual ~HistogramDialog();
+	HistogramWindow(CWnd* pParent = nullptr);   // standard constructor
+	virtual ~HistogramWindow();
+	int threshold = -2;
 	float* values;
 
-// Dialog Data
+
+// Dialog Data 
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_HISTOGRAM };
 #endif

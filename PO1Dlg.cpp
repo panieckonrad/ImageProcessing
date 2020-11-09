@@ -7,7 +7,7 @@
 #include "PO1Dlg.h"
 #include "ParamsDlg.h"
 #include "afxdialogex.h"
-#include "HistogramDialog.h"
+#include "HistogramWindow.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -121,13 +121,33 @@ BOOL CPODlg::OnInitDialog()
 	m_imgOUT.Create(rDlg, this, IMG_WND_ID_OUT);
 	
 	m_combo1.AddString(L"lab1_convert to greyscale");
+
 	m_combo1.AddString(L"lab2_change brightness");
 	m_combo1.AddString(L"lab2_change kontrast");
 	m_combo1.AddString(L"lab2_change potega");
 	m_combo1.AddString(L"lab2_negatyw");
 	m_combo1.AddString(L"lab2_wyswietlenie histogramu");
 	m_combo1.AddString(L"lab2_wyrownanie histogramu");
+
+	m_combo1.AddString(L"lab3_reczne progowanie");
+	m_combo1.AddString(L"lab3_iteracyjne progowanie");
+	m_combo1.AddString(L"lab3_gradient progowanie");
+	m_combo1.AddString(L"lab3_otsu progowanie");
+
+	m_combo1.AddString(L"lab4_filtr srednia 3x3");
+	m_combo1.AddString(L"lab4_filtr Gaussa 3x3");
+	m_combo1.AddString(L"lab4_filtr SobelaPion 3x3");
+	m_combo1.AddString(L"lab4_filtr SobelaPoziom 3x3");
+	m_combo1.AddString(L"lab4_filtr Laplasjanu 3x3");
+	m_combo1.AddString(L"lab4_filtr Wyostrzajaca 3x3");
+	m_combo1.AddString(L"lab4_filtr medianowy 3x3");
+	m_combo1.AddString(L"lab4_filtr medianowy 5x5");
+	m_combo1.AddString(L"lab4_filtr medianowy krzyz");
+	m_combo1.AddString(L"lab4_log");
+
+
 	m_combo1.SelectString(0, L"lab1_convert to greyscale");
+	
 
 
 
@@ -194,7 +214,7 @@ void CPODlg::OnBnClickedButtonLoad()
 	if (FileDlg.DoModal() == IDOK)
 	{
 		filePath = FileDlg.GetPathName();
-		m_imgIN.myClass.LoadDIB(filePath);
+		m_imgIN.Image.LoadDIB(filePath);
 		m_imgIN.doPaint = true;
 		//MessageBox(L"Now what?", L";-)", MB_OK);
 		InvalidateRect(NULL); // onPaint();
@@ -211,42 +231,114 @@ void CPODlg::OnBnClickedButtonProcess()
 	m_combo1.GetLBText(m_combo1.GetCurSel(), sOption);
 
 	m_imgOUT.doPaint = true;
-	m_imgOUT.myClass.LoadDIB(filePath); // wczytaj to samo zdjecie co m_img_in
+	m_imgOUT.Image.LoadDIB(filePath); // wczytaj to samo zdjecie co m_img_in
 
 	if (sOption == L"lab1_convert to greyscale")
 	{
-		m_imgOUT.myClass.CreateGreyscaleDIB(NULL, 0, 0);
+		m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
 	}
 	else if (sOption == L"lab2_change brightness") {
-		m_imgOUT.myClass.CreateGreyscaleDIB(NULL, 0, 0);
-		m_imgOUT.myClass.ChangeBrightness(slider.GetPos());
+		m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+		m_imgOUT.Image.ChangeBrightness(slider.GetPos());
 	}
 	else if (sOption == L"lab2_change kontrast") {
-		m_imgOUT.myClass.CreateGreyscaleDIB(NULL, 0, 0);
-		m_imgOUT.myClass.ChangeKontrast(slider.GetPos());
+		m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+		m_imgOUT.Image.ChangeContrast(slider.GetPos());
 	}
 	else if (sOption == L"lab2_change potega") {
-		m_imgOUT.myClass.CreateGreyscaleDIB(NULL, 0, 0);
-		m_imgOUT.myClass.ChangePotega(slider.GetPos());
+		m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+		m_imgOUT.Image.ChangeExponent(slider.GetPos());
 	}
 	else if (sOption == L"lab2_negatyw") {
-		m_imgOUT.myClass.CreateGreyscaleDIB(NULL, 0, 0);
-		m_imgOUT.myClass.Negatyw();
+		m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+		m_imgOUT.Image.Negative();
 	}
 	else if (sOption == L"lab2_wyswietlenie histogramu") {
-		m_imgOUT.myClass.CalculateHistogram(0, 0, m_imgOUT.myClass.fileWidth, m_imgOUT.myClass.fileHeight);
-		m_imgOUT.myClass.ShowHistogram();
+		m_imgOUT.Image.CalculateHistogram(0, 0, m_imgOUT.Image.fileWidth, m_imgOUT.Image.fileHeight);
+		m_imgOUT.Image.ShowHistogram(-2);
 	}
 	else if (sOption == L"lab2_wyrownanie histogramu") {
-		m_imgOUT.myClass.CalculateHistogram(0, 0, m_imgOUT.myClass.fileWidth, m_imgOUT.myClass.fileHeight);
-		m_imgOUT.myClass.WyrownajHistogram();
-		m_imgOUT.myClass.ShowHistogram();
+		m_imgOUT.Image.CalculateHistogram(0, 0, m_imgOUT.Image.fileWidth, m_imgOUT.Image.fileHeight);
+		m_imgOUT.Image.EqualizeHistogram();
+		m_imgOUT.Image.ShowHistogram(-2);
 	}
+	else if (sOption == L"lab3_reczne progowanie") {
+		m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+		m_imgOUT.Image.CalculateHistogram(0, 0, m_imgOUT.Image.fileWidth, m_imgOUT.Image.fileHeight);
+		m_imgOUT.Image.ManualThreshold(slider.GetPos());
+		m_imgOUT.Image.ShowHistogram(slider.GetPos());
+	}
+	else if (sOption == L"lab3_iteracyjne progowanie") {
+		m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+		m_imgOUT.Image.IterativeSegmentation();
+	}
+	else if (sOption == L"lab3_gradient progowanie") {
+		m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+		m_imgOUT.Image.GradientSegmentation();
+	}
+	else if (sOption == L"lab3_otsu progowanie") {
+		m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+		int threshold = m_imgOUT.Image.OtsuSegmentation();
+		m_imgOUT.Image.ShowHistogram(threshold); // pokazuje rozklad funkcji 1/odchylenieStandardowe zamiast histogramu
+	}
+	else if (sOption == L"lab4_filtr srednia 3x3") {
+		m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+		int mask[3][3] = { { 1, 1, 1 }, { 1, 1, 1 }, { 1, 1, 1 } };
+		m_imgOUT.Image.LinearFilter(mask, false);
+	}
+	else if (sOption == L"lab4_filtr Gaussa 3x3") {
+		m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+		int mask[3][3] = { { 1, 4, 1 }, { 4, 12, 4 }, { 1, 4, 1 } };
+		m_imgOUT.Image.LinearFilter(mask, false);
+	}
+	else if (sOption == L"lab4_filtr SobelaPion 3x3") {
+		m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+		int mask[3][3] = { { 1, 2, 1 }, { 0, 0, 0}, { -1, -2, -1 } };
+		m_imgOUT.Image.LinearFilter(mask, false);
+	}
+	else if (sOption == L"lab4_filtr SobelaPoziom 3x3") {
+		m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+		int mask[3][3] = { { -1, 0, 1 }, { -2, 0, 2}, { -1, 0, 1 } };
+		m_imgOUT.Image.LinearFilter(mask, false);
+	}
+	else if (sOption == L"lab4_filtr Laplasjanu 3x3") {
+		m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+		int mask[3][3] = { { -2, 1, -2 }, { 1, 4, 1}, { -2, 1, -2 } };
+		m_imgOUT.Image.LinearFilter(mask, false);
+	}
+	else if (sOption == L"lab4_filtr Wyostrzajaca 3x3") {
+		m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+		int mask[3][3] = { { 0, -1, 0 }, { -1, 5, -1}, { 0, -1, 0 } };
+		m_imgOUT.Image.LinearFilter(mask, true);
+	}
+	else if (sOption == L"lab4_filtr medianowy 3x3") {
+		m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+		m_imgOUT.Image.MedianFilter(3, 0); // medianowy 3x3
+	}
+	else if (sOption == L"lab4_filtr medianowy 5x5") {
+		m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+		m_imgOUT.Image.MedianFilter(5, 0); // medianowy 5x5
+	}
+	else if (sOption == L"lab4_filtr medianowy krzyz") { // medianowy krzyz 3x3
+		m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+		m_imgOUT.Image.MedianFilter(3, 1); // krzyz 5 elementowy
+	}
+	else if (sOption == L"lab4_log") {
+		m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+		//int mask[3][3] = { { -1, -1, -1 }, { -1, 8, -1}, { -1, -1, -1 } };
+		//m_imgOUT.Image.LinearFilter(mask, true);
+		//m_imgOUT.Image.Negative();
+		m_imgOUT.Image.LogFilter(slider.GetPos());
+		
+
+	}
+
+
 	
 	InvalidateRect(NULL);
 }
 
-
+// save
 void CPODlg::OnBnClickedButtonSave()
 {
 	WCHAR strFilter[] = { L"Image Files (*.bmp)|*.bmp|All Files (*.*)|*.*||" };
@@ -258,7 +350,7 @@ void CPODlg::OnBnClickedButtonSave()
 		//MessageBox(L"Now what?", L";-)");
 		CString fileName = FileDlg.GetPathName();
 		fileName += ".bmp";
-		m_imgOUT.myClass.SaveDIB(fileName);
+		m_imgOUT.Image.SaveDIB(fileName);
 	}
 }
 
@@ -294,7 +386,7 @@ void CPODlg::OnCbnSelchangeCombo1()
 		slider.SetPos(0);
 	}
 	else if (sOption == L"lab2_change kontrast") {
-		slider.SetRangeMin(0);
+		slider.SetRangeMin(1);
 		slider.SetRangeMax(50);
 		slider.SetPos(10);
 	}
@@ -303,6 +395,12 @@ void CPODlg::OnCbnSelchangeCombo1()
 		slider.SetRangeMax(30);
 		slider.SetPos(0);
 	}
-
-
+	else if (sOption == L"lab3_reczne progowanie") {
+		slider.SetRange(0, 255);
+		slider.SetPos(0);
+	}
+	else if (sOption == L"lab4_log") {
+		slider.SetRange(6, 24);
+		slider.SetPos(15);
+	}
 }

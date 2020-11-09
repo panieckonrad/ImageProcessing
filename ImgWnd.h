@@ -1,5 +1,5 @@
 #pragma once
-#include "MyClass.h"
+#include "Image.h"
 
 // CImgWnd
 
@@ -12,7 +12,7 @@ public:
 	virtual ~CImgWnd();
 
 	BOOL Create(const RECT& rect, CWnd*  pParentWnd, UINT nID);
-	MyClass myClass;
+	Image Image;
 	bool doPaint = false;
 protected:
 	

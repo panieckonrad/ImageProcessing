@@ -42,7 +42,7 @@ public:
 	afx_msg void OnBnClickedButtonProcess();
 	afx_msg void OnBnClickedButtonSave();
 	afx_msg void OnBnClickedButtonParams();
-	CSliderCtrl slider;
+	CSliderCtrl slider; // kontrolka slidero
 	afx_msg void OnNMCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCbnSelchangeCombo1();
 };
