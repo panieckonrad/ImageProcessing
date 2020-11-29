@@ -19,6 +19,7 @@ public:
 	bool LoadDIB(CString sciezka_do_pliku);
 	bool PaintDIB(HDC kontekst, CRect r);
 	bool CreateGreyscaleDIB(CRect rozmiar_obrazu, int xPPM, int yPPM);
+	void CreateGreyscaleDIBWhite(CRect rozmiar_obrazu, int xPPM, int yPPM);
 	bool GetPixel1(int x, int y);
 	BYTE GetPixel8(int x, int y);
 	RGBTRIPLE GetPixel24(int x, int y);
@@ -44,5 +45,27 @@ public:
 	void LinearFilter(int mask[3][3], bool maskaWyostrzajaca);
 	void MedianFilter(int value, int option);
 	void LogFilter(int value);
+
+	//LAB5
+	void Pavlidis(HDC context, CRect r);
+	void MapaOdleglosci(int t);
+
+	//LAB6
+	void Dylatacja();
+	void Erozja();
+	void Otwarcie();
+	void Zamkniecie();
+	void KonturWewnetrzny();
+	void KonturZewnetrzny();
+	void Dylatacja8();
+	void Erozja8();
+	void Otwarcie8();
+	void Zamkniecie8();
+	void WhiteTopHat();
+	void BlackTopHat();
+
+	//LAB7
+	void HoughWykres(int grow);
+	void Hough(int grow, int parameter);
 };
 

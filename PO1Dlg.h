@@ -30,6 +30,8 @@ protected:
 	CImgWnd m_imgOUT;
 
 	CComboBox m_combo1;
+
+	int parameter = 1; // parameter equals to 1 by default
 	// Generated message map functions
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);

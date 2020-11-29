@@ -145,6 +145,26 @@ BOOL CPODlg::OnInitDialog()
 	m_combo1.AddString(L"lab4_filtr medianowy krzyz");
 	m_combo1.AddString(L"lab4_log");
 
+	m_combo1.AddString(L"lab5_pavlidis");
+	m_combo1.AddString(L"lab5_mapaodl");
+
+	m_combo1.AddString(L"lab6_dylatacja");
+	m_combo1.AddString(L"lab6_erozja");
+	m_combo1.AddString(L"lab6_otwarcie");
+	m_combo1.AddString(L"lab6_zamkniecie");
+	m_combo1.AddString(L"lab6_kontur wewnetrzny");
+	m_combo1.AddString(L"lab6_kontur zewnetrzny");
+	m_combo1.AddString(L"lab6_dylatacja8");
+	m_combo1.AddString(L"lab6_erozja8");
+	m_combo1.AddString(L"lab6_otwarcie8");
+	m_combo1.AddString(L"lab6_zamkniecie8");
+	m_combo1.AddString(L"lab6_hat black top");
+	m_combo1.AddString(L"lab6_hat white top");
+
+	m_combo1.AddString(L"lab7_hough wykres");
+	m_combo1.AddString(L"lab7_hough");
+
+
 
 	m_combo1.SelectString(0, L"lab1_convert to greyscale");
 	
@@ -329,11 +349,79 @@ void CPODlg::OnBnClickedButtonProcess()
 		//m_imgOUT.Image.LinearFilter(mask, true);
 		//m_imgOUT.Image.Negative();
 		m_imgOUT.Image.LogFilter(slider.GetPos());
-		
-
 	}
+	else if (sOption == L"lab5_pavlidis") {
+		m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
 
+		CDC* cdc = m_imgOUT.GetDC();
+		HDC context = cdc->GetSafeHdc();
 
+		CRect prost_docelowy;
+		m_imgOUT.GetClientRect(prost_docelowy);
+
+		m_imgOUT.Image.Pavlidis(context, prost_docelowy);
+		ReleaseDC(cdc);
+	}
+	else if (sOption == L"lab5_mapaodl") {
+		m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+		m_imgOUT.Image.MapaOdleglosci(slider.GetPos());
+	}
+	else if (sOption == L"lab6_dylatacja") {
+	m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+	m_imgOUT.Image.Dylatacja();
+	}
+	else if (sOption == L"lab6_erozja") {
+	m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+	m_imgOUT.Image.Erozja();
+	}
+	else if (sOption == L"lab6_otwarcie") {
+	m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+	m_imgOUT.Image.Otwarcie();
+	}
+	else if (sOption == L"lab6_zamkniecie") {
+	m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+	m_imgOUT.Image.Zamkniecie();
+	}
+	else if (sOption == L"lab6_kontur wewnetrzny") {
+	m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+	m_imgOUT.Image.KonturWewnetrzny();
+	}
+	else if (sOption == L"lab6_kontur zewnetrzny") {
+	m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+	m_imgOUT.Image.KonturZewnetrzny();
+	}
+	else if (sOption == L"lab6_dylatacja8") {
+	m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+	m_imgOUT.Image.Dylatacja8();
+	}
+	else if (sOption == L"lab6_erozja8") {
+	m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+	m_imgOUT.Image.Erozja8();
+	}
+	else if (sOption == L"lab6_otwarcie8") {
+	m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+	m_imgOUT.Image.Otwarcie8();
+	}
+	else if (sOption == L"lab6_zamkniecie8") {
+	m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+	m_imgOUT.Image.Zamkniecie8();
+	}
+	else if (sOption == L"lab6_hat white top") {
+	m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+	m_imgOUT.Image.WhiteTopHat();
+	}
+	else if (sOption == L"lab6_hat black top") {
+	m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+	m_imgOUT.Image.BlackTopHat();
+	}
+	else if (sOption == L"lab7_hough wykres") {
+	m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+	m_imgOUT.Image.HoughWykres(slider.GetPos());
+	}
+	else if (sOption == L"lab7_hough") {
+	m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+	m_imgOUT.Image.Hough(slider.GetPos(), parameter);
+	}
 	
 	InvalidateRect(NULL);
 }
@@ -359,10 +447,10 @@ void CPODlg::OnBnClickedButtonParams()
 {
 	CParamsDlg paramsDlg;
 	CString s;
-	
 	if (paramsDlg.DoModal() == IDOK)
 	{
 		s = paramsDlg.m_sParams;
+		parameter = _ttoi(s);
 	}
 }
 
@@ -403,4 +491,20 @@ void CPODlg::OnCbnSelchangeCombo1()
 		slider.SetRange(6, 24);
 		slider.SetPos(15);
 	}
+	else if (sOption == L"lab5_mapaodl") {
+		slider.SetRange(0, 255);
+		slider.SetPos(0);
+	}
+	else if (sOption == L"lab7_hough wykres")
+	{
+		slider.SetRange(1, 20);
+		slider.SetPos(0);
+	}
+	else if (sOption == L"lab7_hough")
+	{
+		slider.SetRange(1, 20);
+		slider.SetPos(0);
+	}
+
+
 }

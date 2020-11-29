@@ -2,6 +2,8 @@
 #include "Image.h"
 #include "Math.h"
 #include "HistogramWindow.h"
+#include <vector>
+#include <vector>
 using namespace std;
 
 Image::Image()
@@ -175,6 +177,73 @@ bool Image::CreateGreyscaleDIB(CRect rozmiar_Imageu, int xPPM, int yPPM)
 
 
 	return true;
+}
+
+void Image::CreateGreyscaleDIBWhite(CRect rect, int xPPM, int yPPM) { // lab7
+	int rozmiar_palety = 256 * sizeof(RGBQUAD);
+
+	int szerokosc = rect.right;
+	int wysokosc = rect.bottom;
+	int liczba_pixeli = szerokosc * wysokosc;
+
+	int rozmiar_tablicy_pixeli = (((szerokosc * 8 + 31) / 32) * 4) * wysokosc;
+	DWORD rozmiar_pamieci = sizeof(BITMAPINFOHEADER) + rozmiar_palety + rozmiar_tablicy_pixeli;
+	LPVOID Image = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, rozmiar_pamieci);
+
+	BITMAPINFOHEADER* info_header = (BITMAPINFOHEADER*)Image;
+	info_header->biBitCount = 8;
+	info_header->biHeight = wysokosc;
+	info_header->biWidth = szerokosc;
+	info_header->biSize = sizeof(BITMAPINFOHEADER);
+	info_header->biPlanes = 1;
+	info_header->biCompression = BI_RGB;
+	info_header->biSizeImage = rozmiar_tablicy_pixeli;
+	info_header->biXPelsPerMeter = xPPM;
+	info_header->biYPelsPerMeter = yPPM;
+	info_header->biClrUsed = 0;
+	info_header->biClrImportant = 0;
+
+	RGBQUAD* paleta_kolorow = (RGBQUAD*)((BYTE*)Image + info_header->biSize);
+
+	RGBQUAD kolor;
+	for (int i = 0; i < 256; i++)
+	{
+		kolor.rgbBlue = i;
+		kolor.rgbGreen = i;
+		kolor.rgbRed = i;
+		kolor.rgbReserved = 0;
+		paleta_kolorow[i] = kolor;
+	}
+
+	BITMAPINFO* bitmap_info = (BITMAPINFO*)Image;
+
+	BYTE* tablica_pixeli = (BYTE*)paleta_kolorow + rozmiar_palety;
+
+	int bitMapType = ((BITMAPINFOHEADER*)ImageInfo)->biBitCount;
+
+	for (int y = 0; y < wysokosc; y++) // make every pixel white
+	{
+		for (int x = 0; x < szerokosc; x++)
+		{
+			int index = y * ((szerokosc * 8 + 31) / 32) * 4 + x;
+			tablica_pixeli[index] = 255;
+		}
+	}
+
+	BITMAPFILEHEADER file_header;
+
+	file_header = header;
+	file_header.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + rozmiar_palety;
+	file_header.bfSize = sizeof(BITMAPFILEHEADER) + info_header->biSize + rozmiar_palety + rozmiar_tablicy_pixeli;
+
+	header = file_header;
+	ImageInfo = bitmap_info;
+	ImageKolory = paleta_kolorow;
+	ImageBajty = tablica_pixeli;
+	fileWidth = szerokosc;
+	fileHeight = wysokosc;
+
+	sizeOfFile = header.bfSize - sizeof(BITMAPFILEHEADER);
 }
 
 bool Image::SaveDIB(CString sciezka_do_pliku)
@@ -525,7 +594,7 @@ void Image::MedianFilter(int value, int option) { //option 0 3x3 option , option
 				int counter = 0;
 				for (int i = -maskOffset; i < maskOffset+1; i++) { 
 					for (int j = -maskOffset; j <  maskOffset+1; j++) {
-						BYTE pixel;
+						int pixel;
 						if (x - i < 0 || x - i >= fileWidth || y - j < 0 || y - j >= fileHeight) {
 							pixel = GetPixel8(x, y);
 						}
@@ -539,7 +608,7 @@ void Image::MedianFilter(int value, int option) { //option 0 3x3 option , option
 			else if (option == 1) { // jesli krzyzowa
 				int counter = 0;
 				for (int i = -maskOffset; i < maskOffset+1; i++) { //pion od piksela
-					BYTE pixel;
+					int pixel;
 					if(y - i < 0 || y - i >= fileHeight){
 						pixel = GetPixel8(x, y);
 					}
@@ -549,7 +618,7 @@ void Image::MedianFilter(int value, int option) { //option 0 3x3 option , option
 					mask[counter++] = pixel;
 				}
 				for (int i = -maskOffset; i < maskOffset+1; i++) {
-					BYTE pixel;
+					int pixel;
 					if (x - i < 0 || x - i >= fileWidth) {
 						pixel = GetPixel8(x, y);
 					}
@@ -590,6 +659,7 @@ void Image::MedianFilter(int value, int option) { //option 0 3x3 option , option
 void Image::LogFilter(int value) {
 	float sigma = value / 10.0f;
 
+
 	int maskSize = (1 + 2 * ceil(2.5f * sigma));
 	float** mask = new float* [maskSize];
 	int maskOffset = maskSize / 2;
@@ -617,7 +687,7 @@ void Image::LogFilter(int value) {
 	}
 	b = sum;
 	int size = fileWidth * fileHeight;
-	float* newPixels = new float[size];
+	int* intPixels = new int[size];
 
 
 	for (int x = 0; x < fileWidth; x++){
@@ -639,18 +709,772 @@ void Image::LogFilter(int value) {
 			if (newValue < 0) newValue = 0;
 			else newValue = 255;
 
-			newPixels[y * fileWidth + x] = newValue;
+			intPixels[y * fileWidth + x] = newValue;
 		}
 	}
 
 	for (int x = 0; x < fileWidth; x++){
 		for (int y = 0; y < fileHeight; y++){
+			SetPixel8(x, y, intPixels[y * fileWidth + x]);
+		}
+	}
+	delete []intPixels;
+	for (int i = 0; i < maskSize; ++i)
+		delete mask[i];
+	delete[] mask;
+}
+
+
+//void Image::LogFilter(int value) {
+//	float sigma = value / 10.0f;
+//
+//
+//	int maskSize = (1 + 2 * ceil(2.5f * sigma));
+//	float** mask = new float* [maskSize];
+//	int maskOffset = maskSize / 2;
+//
+//	for (int i = 0; i < maskSize; i++) {
+//		mask[i] = new float[maskSize];
+//	}
+//	float sum = 0;
+//	for (int i = -maskOffset; i < maskOffset+1; i++) {
+//		for (int j = -maskOffset; j < maskOffset+1; j++) {
+//			float a = (-1) * (i * i + j * j - (sigma * sigma)) / pow(sigma, 4);
+//			float expPow = (-1) * ((i * i + j * j) / (2 * sigma * sigma));
+//			float expo = exp(expPow);
+//			mask[maskOffset+i][maskOffset+j] = a * expo;
+//			sum += mask[i+maskOffset][j+maskOffset];
+//		}
+//	}
+//	//float S = sum; // sum of all
+//	//float PS = 0; // sum of positives
+//
+//
+//	//for (int i = 0; i < maskSize; i++) {
+//	//	for (int j = 0; j < maskSize; j++) {
+//	//		if (mask[i][j] > 0)
+//	//			mask[i][j]  = mask[i][j]+ (mask[i][j] * S) / PS;
+//	//	}
+//	//}
+//
+//		//for (int i = 0; i < maskSize; i++) {
+//	//	for (int j = 0; j < maskSize; j++) {
+//	//		if (mask[i][j] > 0)
+//	//			mask[i][j]  = mask[i][j]+ (mask[i][j] * S) / PS;
+//	//	}
+//	//}
+//
+//	int size = fileWidth * fileHeight;
+//	int* intPixels = new int[size];
+//
+//
+//	for (int x = 0; x < fileWidth; x++) {
+//		for (int y = 0; y < fileHeight; y++) {
+//
+//			float licznik = 0;
+//			for (int i = -maskOffset; i < maskOffset+1; i++) {
+//				for (int j = -maskOffset; j < maskOffset+1; j++) {
+//
+//					int pixel;
+//					if (x - i < 0 || x - i >= fileWidth || y - j < 0 || y - j >= fileHeight)
+//						continue;
+//					else
+//						pixel = GetPixel8(x - i, y - j);
+//					licznik += (mask[i+maskOffset][j+maskOffset] * pixel);
+//				}
+//			}
+//			float newValue = licznik + 127*5;
+//			if (newValue < 0) newValue = 0;
+//			else newValue = 255;
+//
+//			intPixels[y * fileWidth + x] = newValue;
+//		}
+//	}
+//
+//	for (int x = 0; x < fileWidth; x++) {
+//		for (int y = 0; y < fileHeight; y++) {
+//			SetPixel8(x, y, intPixels[y * fileWidth + x]);
+//		}
+//	}
+//	delete[]intPixels;
+//	for (int i = 0; i < maskSize; i++)
+//		delete mask[i];
+//	delete[] mask;
+//}
+
+void Image::Pavlidis(HDC context, CRect r) {
+	int size = fileWidth * fileHeight;
+	int* values = new int[size];
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+			if (GetPixel8(x, y) == 0) values[y * fileWidth + x] = 1;
+			else if (GetPixel8(x, y) == 255) values[y * fileWidth + x] = 0;
+		}
+	}
+
+	bool loop = true;
+	while (loop)
+	{
+		loop = false;
+		for (int i = 0; i < 4; i++)
+		{
+			for (int x = 1; x < fileWidth - 1; x++) {
+				for (int y = 1; y < fileHeight - 1; y++) {
+
+					bool contin = false;
+					if (values[y * fileWidth + x] == 1) {
+
+						if (i == 0) {
+							if (values[y * fileWidth + (x + 1)] == 0)
+								contin = true;
+						}
+						else if (i == 1) {
+							if (values[(y + 1) * fileWidth + x] == 0)
+								contin = true;
+						}
+						else if (i == 2) {
+							if (values[y * fileWidth + (x - 1)] == 0)
+								contin = true;
+						}
+						else if (i == 3) {
+							if (values[(y - 1) * fileWidth + x] == 0)
+								contin = true;
+						}
+					}
+					if (contin) {
+						bool skeleton = false;
+
+						//zero horizontal
+						if (values[y * fileWidth + (x + 1)] == 0 && values[y * fileWidth + (x - 1)] == 0) {
+							if ((values[(y + 1) * fileWidth + (x + 1)] != 0 || values[(y + 1) * fileWidth + (x - 1)] != 0 || values[(y + 1) * fileWidth + x] != 0) &&
+								(values[(y - 1) * fileWidth + (x + 1)] != 0 || values[(y - 1) * fileWidth + (x - 1)] != 0 || values[(y - 1) * fileWidth + x] != 0))
+								skeleton = true;
+						}
+						//zero vertical
+						if (values[(y - 1) * fileWidth + x] == 0 && values[(y + 1) * fileWidth + x] == 0) {
+							if ((values[(y + 1) * fileWidth + (x + 1)] != 0 || values[(y - 1) * fileWidth + (x + 1)] != 0 || values[(y)*fileWidth + (x + 1)] != 0) &&
+								(values[(y + 1) * fileWidth + (x - 1)] != 0 || values[(y - 1) * fileWidth + (x - 1)] != 0 || values[(y)*fileWidth + (x - 1)] != 0))
+								skeleton = true;
+						}
+						//0 degrees
+						if (values[(y - 1) * fileWidth + (x - 1)] == 1 || values[(y - 1) * fileWidth + (x - 1)] == 2) { //1
+							if (values[(y)*fileWidth + (x - 1)] == 0 && values[(y - 1) * fileWidth + (x)] == 0) {
+								if (values[(y + 1) * fileWidth + (x - 1)] != 0 ||
+									values[(y + 1) * fileWidth + (x)] != 0 ||
+									values[(y + 1) * fileWidth + (x + 1)] != 0 ||
+									values[(y)*fileWidth + (x + 1)] != 0 ||
+									values[(y - 1) * fileWidth + (x + 1)] != 0) {
+									skeleton = true;
+								}
+							}
+						}
+						//90 degrees
+						if (values[(y - 1) * fileWidth + (x + 1)] == 1 || values[(y - 1) * fileWidth + (x + 1)] == 2) { //1
+							if (values[(y)*fileWidth + (x + 1)] == 0 && values[(y - 1) * fileWidth + (x)] == 0) { //0
+								if (values[(y + 1) * fileWidth + (x + 1)] != 0 ||
+									values[(y + 1) * fileWidth + (x)] != 0 ||
+									values[(y + 1) * fileWidth + (x - 1)] != 0 ||
+									values[(y)*fileWidth + (x - 1)] != 0 ||
+									values[(y - 1) * fileWidth + (x - 1)] != 0) {
+									skeleton = true;
+								}
+							}
+						}
+						//180 degrees
+						if (values[(y + 1) * fileWidth + (x + 1)] == 1 || values[(y + 1) * fileWidth + (x + 1)] == 2) { //1
+							if (values[(y)*fileWidth + (x + 1)] == 0 && values[(y + 1) * fileWidth + (x)] == 0) { //0
+								if (values[(y - 1) * fileWidth + (x + 1)] != 0 ||
+									values[(y - 1) * fileWidth + (x)] != 0 || 
+									values[(y - 1) * fileWidth + (x - 1)] != 0 ||
+									values[(y)*fileWidth + (x - 1)] != 0 ||
+									values[(y + 1) * fileWidth + (x - 1)] != 0) {
+									skeleton = true;
+								}
+							}
+						}
+						//270 degrees
+						if (values[(y + 1) * fileWidth + (x - 1)] == 1 || values[(y + 1) * fileWidth + (x - 1)] == 2) { //1
+							if (values[(y)*fileWidth + (x - 1)] == 0 && values[(y + 1) * fileWidth + (x)] == 0) { //0
+								if (values[(y - 1) * fileWidth + (x - 1)] != 0 ||
+									values[(y - 1) * fileWidth + (x)] != 0 ||
+									values[(y - 1) * fileWidth + (x + 1)] != 0 ||
+									values[(y)*fileWidth + (x + 1)] != 0 ||
+									values[(y + 1) * fileWidth + (x + 1)] != 0) {
+									skeleton = true;
+								}
+							}
+						}
+
+						if (skeleton)
+							values[y * fileWidth + x] = 2;
+						else {
+							values[y * fileWidth + x] = 3;
+							loop = true;
+						}
+					}
+
+				}
+			}
+
+
+			for (int x = 0; x < fileWidth; x++) {
+				for (int y = 0; y < fileHeight; y++) {
+					if (values[y * fileWidth + x] == 3) {
+						SetPixel8(x, y, 255);
+						values[y * fileWidth + x] = 0;
+					}
+				}
+			}
+			PaintDIB(context, r);
+			Sleep(20);
+		}
+	}
+	delete values;
+
+}
+
+void Image::MapaOdleglosci(int t) {
+	int size = fileWidth * fileHeight;
+	int* values = new int[size];
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+			if (GetPixel8(x, y) == 0)
+				values[y * fileWidth + x] = 1;
+			if (GetPixel8(x, y) == 255)
+				values[y * fileWidth + x] = 0;
+		}
+	}
+	int max = 0;
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+			if (GetPixel8(x, y) == 0) {
+				int maskSize = 1;
+				bool found = false;
+				while (!found) {
+					for (int i = -maskSize; i < maskSize + 1; i++) {
+						for (int j = -maskSize; j < maskSize + 1; j++) {
+							if (y + j < 0 || x + i < 0 || y + j >= fileHeight || x + i >= fileWidth) continue;
+							if (values[(y + j) * fileWidth + (x + i)] == 0) {
+								values[y * fileWidth + x] = maskSize;
+								found = true;
+							}
+						}
+					}
+					maskSize++;
+				}
+				if (maskSize > max)
+					max = maskSize;
+			}
+		}
+	}
+
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+			int value = values[y * fileWidth + x];
+			value = ((float)value / (float)max) * 255;
+			SetPixel8(x, y, t>=(255 - value)?0:255);
+			//SetPixel8(x, y, 255-value);
+		}
+	}
+
+	delete values;
+}
+
+void Image::Dylatacja() {
+	int size = fileWidth * fileHeight;
+	int* newValues = new int[size];
+
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+			newValues[y * fileWidth + x] = 255; // ustaw na poczatku wszystko na biale
+		}
+	}
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+
+			if (GetPixel8(x, y) != 0) {// jesli nie jest czescia obiektu to SKIP
+				continue;
+			}
+			 
+			for (int i = -1; i < 2; i++) {
+				for (int j = -1; j < 2; j++) {
+
+					if (x + i <= 0 || x + i >= fileWidth || y + j <= 0 || y + j >= fileHeight)
+						continue;
+					newValues[(y + j) * fileWidth + (x + i)] = 0;
+
+				}
+			}
+		}
+	}
+
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+			SetPixel8(x, y, newValues[y * fileWidth + x]);
+		}
+	}
+
+	delete []newValues;
+}
+
+void Image::Erozja() {
+	int size = fileWidth * fileHeight;
+	int* newValues = new int[size];
+
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+
+			if (GetPixel8(x, y) != 0) {
+				newValues[y * fileWidth + x] = 255;
+				continue;
+			}
+			 // ta czesc wykona sie tylko dla piksela nalezacego do obiektu
+			int toDelete = 0;
+			for (int i = -1; i < 2; i++) {
+				for (int j = -1; j < 2; j++) {
+
+					if (x + i <= 0 || x + i >= fileWidth || y + j <= 0 || y + j >= fileHeight)
+						continue;
+					if (GetPixel8(x + i, y + j) != 0) // jesli piskel maski nie jest czescia obiektu to rozjasnij dany piksel
+						toDelete++;
+				}
+			}
+			if (toDelete > 0)
+				newValues[y * fileWidth + x] = 255;
+			else
+				newValues[y * fileWidth + x] = 0;
+		}
+	}
+
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+			SetPixel8(x, y, newValues[y * fileWidth + x]);
+		}
+	}
+
+	delete []newValues;
+}
+
+void Image::Otwarcie() {
+	Erozja();
+	Dylatacja();
+}
+void Image::Zamkniecie() {
+	Dylatacja();
+	Erozja();
+}
+
+void Image::KonturWewnetrzny() {
+	int size = fileWidth * fileHeight;
+	int* newPixels = new int[size];
+	int* oldPixels = new int[size];
+
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+			oldPixels[y * fileWidth + x] = GetPixel8(x, y);
+		}
+	}
+
+	Erozja();
+
+
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+
+			if (oldPixels[y * fileWidth + x] < GetPixel8(x, y)) // jesli w starym obrazie dany piksel byl czarny a po erozji bialy, to ustaw ten piksel na czarny bo to znaczy ze byl wewnetrzna krawedzia.
+				newPixels[y * fileWidth + x] = 0;
+			else
+				newPixels[y * fileWidth + x] = 255;
+		}
+	}
+
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
 			SetPixel8(x, y, newPixels[y * fileWidth + x]);
 		}
 	}
+
 	delete []newPixels;
-	for (int i = 0; i < maskSize; ++i)
-		delete mask[i];
-		delete[] mask;
+	delete []oldPixels;
 }
 
+void Image::KonturZewnetrzny() {
+	int size = fileWidth * fileHeight;
+	int* newPixels = new int[size];
+	int* oldPixels = new int[size];
+
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+			oldPixels[y * fileWidth + x] = GetPixel8(x, y);
+		}
+	}
+
+	Dylatacja();
+
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+
+			if (oldPixels[y * fileWidth + x] > GetPixel8(x, y))// jesli w starym obrazie dany piksel byl bialy a po dylatacji czarny, to ustaw ten piksel na czarny bo byl zewnetrzna krawedzia
+				newPixels[y * fileWidth + x] = 0;
+			else
+				newPixels[y * fileWidth + x] = 255;
+		}
+	}
+
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+			SetPixel8(x, y, newPixels[y * fileWidth + x]);
+		}
+	}
+
+	delete []newPixels;
+	delete []oldPixels;
+}
+
+void Image::Erozja8() {
+	int size = fileWidth * fileHeight;
+	int* newPixels = new int[size];
+
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+			newPixels[y * fileWidth + x] = 255;
+		}
+	}
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+
+			int max = 0;
+			for (int i = -1; i < 2; i++) {
+				for (int j = -1; j < 2; j++) {
+
+					if (x + i <= 0 || x + i >= fileWidth || y + j <= 0 || y + j >= fileHeight)
+						continue;
+					if (GetPixel8(x + i, y + j) > max)
+						max = GetPixel8(x + i, y + j);
+				}
+			}
+			newPixels[y * fileWidth + x] = max;
+		}
+	}
+
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+			SetPixel8(x, y, newPixels[y * fileWidth + x]);
+		}
+	}
+
+	delete []newPixels;
+}
+
+void Image::Dylatacja8() {
+	int size = fileWidth * fileHeight;
+	int* newPixels = new int[size];
+
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+			newPixels[y * fileWidth + x] = 255;
+		}
+	}
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+
+			int min = 255;
+			for (int i = -1; i < 2; i++) {
+				for (int j = -1; j < 2; j++) {
+
+					if (x + i <= 0 || x + i >= fileWidth || y + j <= 0 || y + j >= fileHeight)
+						continue;
+					if (GetPixel8(x + i, y + j) < min)
+						min = GetPixel8(x + i, y + j);
+				}
+			}
+			newPixels[y * fileWidth + x] = min;
+		}
+	}
+
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+			SetPixel8(x, y, newPixels[y * fileWidth + x]);
+		}
+	}
+
+	delete[]newPixels;
+}
+
+void Image::Zamkniecie8() {
+	Dylatacja8();
+	Erozja8();
+}
+void Image::Otwarcie8() {
+	Erozja8();
+	Dylatacja8();
+}
+
+void Image::WhiteTopHat() {
+	int size = fileWidth * fileHeight;
+	int* newPixels = new int[size];
+	int* oldPixels = new int[size];
+	int a = 5;
+
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+			oldPixels[y * fileWidth + x] = GetPixel8(x, y);
+		}
+	}
+
+	Zamkniecie8();
+
+
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+
+			//if (oldPixels[y * fileWidth + x] > GetPixel8(x, y))
+				newPixels[y * fileWidth + x] = oldPixels[y * fileWidth + x] - GetPixel8(x, y);
+		//	else
+			//	newPixels[y * fileWidth + x] = GetPixel8(x, y) - oldPixels[y * fileWidth + x];
+		}
+	}
+
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+			SetPixel8(x, y, Floor(newPixels[y * fileWidth + x]*a));
+		}
+	}
+
+	delete[] newPixels;
+	delete[] oldPixels;
+}
+
+void Image::BlackTopHat() {
+	int size = fileWidth * fileHeight;
+	int* newPixels = new int[size];
+	int* oldPixels = new int[size];
+	int a = 5;
+
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+			oldPixels[y * fileWidth + x] = GetPixel8(x, y);
+		}
+	}
+
+	Otwarcie8();
+
+
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+
+		//	if (oldPixels[y * fileWidth + x] < GetPixel8(x, y))
+				newPixels[y * fileWidth + x] = GetPixel8(x, y) - oldPixels[y * fileWidth + x];
+		//	else
+		//		newPixels[y * fileWidth + x] = oldPixels[y * fileWidth + x] - GetPixel8(x, y);
+		}
+	}
+
+	for (int x = 0; x < fileWidth; x++) {
+		for (int y = 0; y < fileHeight; y++) {
+			SetPixel8(x, y, Floor(newPixels[y * fileWidth + x] * a));
+		}
+	}
+
+	delete []newPixels;
+	delete []oldPixels;
+}
+
+# define M_PI           3.14159265358979323846  /* pi */
+
+void Image::HoughWykres(int step) {
+
+	float maxRoHeight = sqrt(pow(fileWidth / 2, 2) + pow(fileHeight / 2, 2));
+	float minRoHeight = 1;
+
+	float ro = 0.0;
+
+	int widthOfAkumulator = 360;
+	int heightOfAkumulator = int(maxRoHeight) + 1;
+
+	int** akumulator = new int* [widthOfAkumulator];
+	for (int i = 0; i < widthOfAkumulator; i++) {
+		akumulator[i] = new int[heightOfAkumulator];
+	}
+
+	for (int i = 0; i < widthOfAkumulator; i++) {
+		for (int j = 0; j < heightOfAkumulator; j++) {
+			akumulator[i][j] = 0;
+		}
+	}
+
+	for (int y = 0; y < fileHeight; y++)
+	{
+		for (int x = 0; x < fileWidth; x++)
+		{
+			if (GetPixel8(x, y) == 0) // jesli piksel jest czarny
+			{
+				int yi = y - fileHeight / 2;
+				int xi = x - fileWidth / 2;
+
+				for (int deg = 0; deg < 360; deg += step)
+				{
+					ro = xi * cos((M_PI / 180) * deg) + yi * sin((M_PI / 180) * deg);
+
+					if (ro < 0)
+						continue;
+
+					akumulator[deg][int(ro)]++; 
+				}
+			}
+		}
+	}
+
+	int maxPrzeciecia = 0;
+	int maxDeg = 0;
+	int maxRo = 0;
+
+	for (int i = 0; i < widthOfAkumulator; i++) // wyznacz maksymalna wartosc w akumulatorze
+	{
+		for (int j = 0; j < heightOfAkumulator; j++)
+		{
+			int value = akumulator[i][j];
+
+			if (value > maxPrzeciecia)
+			{
+				maxPrzeciecia = value;
+				maxDeg = i;
+				maxRo = j;
+			}
+		}
+	}
+
+	int color = 255 / maxPrzeciecia;
+	CreateGreyscaleDIBWhite(new CRect(0, 0, widthOfAkumulator, heightOfAkumulator), 0, 0); // stworz pusty bialy obraz o rozmiarach akumulatora
+
+	for (int i = 0; i < widthOfAkumulator; i += step) // rysuj wykres z przecieciami
+	{
+		for (int j = 0; j < heightOfAkumulator; j++)
+		{
+			int przeciecia = akumulator[i][j];
+
+			if (przeciecia > 0)
+			{
+				for (int k = 0; k < step; k++)
+				{
+					if (i+k <= 0 || i+k >= fileWidth || j <= 0 || j >= fileHeight)
+						continue;
+					SetPixel8(i + k, j, Floor(255 - color*przeciecia - 10)); // im wieksza wartosc w akumulatorze tym ciemniejsze
+				}
+			}
+			else
+			{
+				for (int k = 0; k < step; k++)
+				{
+					if (i + k <= 0 || i + k >= fileWidth || j <= 0 || j >= fileHeight)
+						continue;
+					SetPixel8(i + k, j, 255);
+				}
+			}
+		}
+	}
+
+	for (int i = 0; i < widthOfAkumulator; ++i)
+		delete akumulator[i];
+	delete[] akumulator;
+}
+
+void Image::Hough(int step, int parameter) { // parameter -> ile linii narysowac / ile krawedzi wykrywac
+	float maxRoHeight = sqrt(pow(fileWidth / 2, 2) + pow(fileHeight / 2, 2));
+
+	float ro = 0.0;
+
+	int widthOfAkumulator = 360;
+	int heightOfAkumulator = int(maxRoHeight) + 1;
+
+	int** akumulator = new int* [widthOfAkumulator];
+	for (int i = 0; i < widthOfAkumulator; i++) {
+		akumulator[i] = new int[heightOfAkumulator];
+	}
+
+	for (int i = 0; i < widthOfAkumulator; i++) {
+		for (int j = 0; j < heightOfAkumulator; j++) {
+			akumulator[i][j] = 0;
+		}
+	}
+
+	for (int y = 0; y < fileHeight; y++)
+	{
+		for (int x = 0; x < fileWidth; x++)
+		{
+			if (GetPixel8(x, y) == 0) // jesli piksel jest czarny
+			{
+				int yi = y - fileHeight / 2;
+				int xi = x - fileWidth / 2;
+
+				for (int deg = 0; deg < 360; deg += step)
+				{
+					ro = xi * cos((M_PI / 180) * deg) + yi * sin((M_PI / 180) * deg);
+
+					if (ro < 0)
+						continue;
+
+					akumulator[deg][int(ro)]++;
+				}
+			}
+		}
+	}
+
+	vector<int> tabMaxPrzeciecia;
+	vector<int> tabMaxDeg;
+	vector<int> tabMaxRo;
+
+	for (int p = 0; p < parameter; p++) {
+		int maxPrzeciecia = 0;
+		int maxDeg = 0;
+		int maxRo = 0;
+
+		for (int i = 0; i < widthOfAkumulator; i++) // wyznacz maksymalna wartosc w akumulatorze 
+		{
+			for (int j = 0; j < heightOfAkumulator; j++)
+			{
+				int przeciecia = akumulator[i][j];
+
+				if (przeciecia > maxPrzeciecia)
+				{
+					maxPrzeciecia = przeciecia; // najwieksza ilosc przeciec
+					maxDeg = i; // wartosc kata theta dla max wartosci
+					maxRo = j; // wartosc ro dla tego kata
+				}
+			}
+		}
+		tabMaxPrzeciecia.push_back(maxPrzeciecia);
+		tabMaxDeg.push_back(maxDeg);
+		tabMaxRo.push_back(maxRo);
+		akumulator[maxDeg][maxRo] = 0; //wyzeruj zeby nie powtarzac znowu tego samego maksimum
+		//TODO wyzerowac sasiadow tak jak opisane w instrukcji
+	}
+	float offset = 0.5; // jak grube ma byc zaznaczenie linii
+
+
+	for (int p = 0; p < parameter; p++) {
+
+		for (int y = 0; y < fileHeight; y++)
+		{
+			for (int x = 0; x < fileWidth; x++)
+			{
+				int yi = y - fileHeight / 2;
+				int xi = x - fileWidth / 2;
+
+				float r = (xi * cos((M_PI / 180) * tabMaxDeg[p]) + yi * sin((M_PI / 180) * tabMaxDeg[p]));
+
+				if (r > 0)
+				{
+					if (r >= tabMaxRo[p] - offset && r <= tabMaxRo[p] + offset)
+					{
+						SetPixel8(x, y, 150); // zaznacz na szaro zeby bylo widoczne
+					}
+				}
+			}
+		}
+	}
+
+	for (int i = 0; i < widthOfAkumulator; ++i)
+		delete akumulator[i];
+	delete[] akumulator;
+}
