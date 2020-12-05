@@ -17,7 +17,7 @@ public:
 	CString filePath;
 // Dialog Data
 	enum { IDD = IDD_PO1_DIALOG };
-
+	
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 

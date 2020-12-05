@@ -101,7 +101,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HistogramWindow.h" />
-    <ClInclude Include="Image.h" />
+    <ClInclude Include="myImage.h" />
     <ClInclude Include="ImgWnd.h" />
     <ClInclude Include="ParamsDlg.h" />
     <ClInclude Include="PO1.h" />
@@ -112,7 +112,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HistogramWindow.cpp" />
-    <ClCompile Include="Image.cpp" />
+    <ClCompile Include="myImage.cpp" />
     <ClCompile Include="ImgWnd.cpp" />
     <ClCompile Include="ParamsDlg.cpp" />
     <ClCompile Include="PO1.cpp" />

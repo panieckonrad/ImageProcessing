@@ -9,7 +9,8 @@
 #endif
 
 #include "resource.h"		// main symbols
-
+#include <gdiplus.h> 
+using namespace Gdiplus;
 
 // CPOApp:
 // See PO1.cpp for the implementation of this class
@@ -17,8 +18,11 @@
 
 class CPOApp : public CWinApp
 {
+
 public:
 	CPOApp();
+	GdiplusStartupInput gdiplusParametry;
+	ULONG_PTR gdiplusToken;
 
 // Overrides
 public:

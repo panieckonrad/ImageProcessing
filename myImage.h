@@ -1,6 +1,6 @@
 #pragma once
-class Image
-{
+class myImage
+{			
 
 public:
 	BITMAPFILEHEADER header;
@@ -12,8 +12,8 @@ public:
 	int fileWidth = 0, fileHeight = 0;
 	float* histogram;
 
-	Image();
-	~Image();
+	myImage();
+	~myImage();
 
 	//LAB1
 	bool LoadDIB(CString sciezka_do_pliku);
@@ -67,5 +67,10 @@ public:
 	//LAB7
 	void HoughWykres(int grow);
 	void Hough(int grow, int parameter);
+
+	//LAB8
+	void Hamming();
+	void FourierAmplituda();
+	void FourierFaza();
 };
 

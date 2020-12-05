@@ -1,20 +1,20 @@
 #include "stdafx.h"
-#include "Image.h"
+#include "myImage.h"
 #include "Math.h"
 #include "HistogramWindow.h"
 #include <vector>
 #include <vector>
 using namespace std;
 
-Image::Image()
+myImage::myImage()
 {
 }
 
-Image::~Image()
+myImage::~myImage()
 {
 }
 
-bool Image::LoadDIB(CString sciezka_do_pliku) { // wczytaj Image
+bool myImage::LoadDIB(CString sciezka_do_pliku) { // wczytaj Image
 	CFile f;
 	header;
 	f.Open(sciezka_do_pliku, CFile::modeReadWrite);
@@ -36,7 +36,7 @@ bool Image::LoadDIB(CString sciezka_do_pliku) { // wczytaj Image
 	return true;
 }
 
-bool Image::PaintDIB(HDC kontekst, CRect r)
+bool myImage::PaintDIB(HDC kontekst, CRect r)
 {
 	SetStretchBltMode(kontekst, COLORONCOLOR);
 	int x = 0, y = 0; // d = destination
@@ -65,7 +65,7 @@ bool Image::PaintDIB(HDC kontekst, CRect r)
 }
 
 //do wyœwietlania wczytanych Imageów,
-bool Image::GetPixel1(int x, int y)
+bool myImage::GetPixel1(int x, int y)
 {
 	long int index = y * ((fileWidth + 31) / 32) * 4 + x / 8;
 	BYTE byte = ((BYTE*)ImageBajty)[index];
@@ -74,13 +74,13 @@ bool Image::GetPixel1(int x, int y)
 	return bit;
 }
 //do odczytywania wartoœci pikseli w bitmapach 1 - bitowych,
-BYTE Image::GetPixel8(int x, int y)
+BYTE myImage::GetPixel8(int x, int y)
 {
 	int index = y * ((8 * fileWidth + 31) / 32) * 4 + x;
 	return ((BYTE*)ImageBajty)[index];
 }
 //do odczytywania wartoœci pikseli w bitmapach 8 - bitowych,
-RGBTRIPLE Image::GetPixel24(int x, int y)
+RGBTRIPLE myImage::GetPixel24(int x, int y)
 {
 	int index = y * ((24 * fileWidth + 31) / 32) * 4 + 3 * x;
 	BYTE* color = (BYTE*)ImageBajty + index;
@@ -88,14 +88,14 @@ RGBTRIPLE Image::GetPixel24(int x, int y)
 }
 //do odczytywania wartoœci pikseli w bitmapach 24 - bitowych,
 
-bool Image::SetPixel8(int x, int y, BYTE val)
+bool myImage::SetPixel8(int x, int y, BYTE val)
 {
 	int index = y * ((8 * fileWidth + 31) / 32) * 4 + x;
 	((BYTE*)ImageBajty)[index] = val;
 	return true;
 }
 
-bool Image::CreateGreyscaleDIB(CRect rozmiar_Imageu, int xPPM, int yPPM)
+bool myImage::CreateGreyscaleDIB(CRect rozmiar_Imageu, int xPPM, int yPPM)
 {
 	int rozmiar_palety = 256 * sizeof(RGBQUAD);
 
@@ -179,7 +179,7 @@ bool Image::CreateGreyscaleDIB(CRect rozmiar_Imageu, int xPPM, int yPPM)
 	return true;
 }
 
-void Image::CreateGreyscaleDIBWhite(CRect rect, int xPPM, int yPPM) { // lab7
+void myImage::CreateGreyscaleDIBWhite(CRect rect, int xPPM, int yPPM) { // lab7
 	int rozmiar_palety = 256 * sizeof(RGBQUAD);
 
 	int szerokosc = rect.right;
@@ -246,7 +246,7 @@ void Image::CreateGreyscaleDIBWhite(CRect rect, int xPPM, int yPPM) { // lab7
 	sizeOfFile = header.bfSize - sizeof(BITMAPFILEHEADER);
 }
 
-bool Image::SaveDIB(CString sciezka_do_pliku)
+bool myImage::SaveDIB(CString sciezka_do_pliku)
 {
 	CFile f;
 	f.Open(sciezka_do_pliku, CFile::modeCreate);
@@ -271,7 +271,7 @@ BYTE Floor(float value) {
 	return (BYTE)value;
 }
 
-void Image::ChangeBrightness(float value) {
+void myImage::ChangeBrightness(float value) {
 	for (int y = 0; y < fileHeight; y++) {
 		for (int x = 0; x < fileWidth; x++) {
 			SetPixel8(x, y, Floor(GetPixel8(x, y) + value));
@@ -280,7 +280,7 @@ void Image::ChangeBrightness(float value) {
 
 
 }
-void Image::ChangeContrast(float value)
+void myImage::ChangeContrast(float value)
 {
 	value /= 10.0;
 
@@ -293,7 +293,7 @@ void Image::ChangeContrast(float value)
 	}
 }
 
-void Image::ChangeExponent(float value) {
+void myImage::ChangeExponent(float value) {
 	float newValue = value / 10.0;
 
 	for (int y = 0; y < fileHeight; y++)
@@ -306,7 +306,7 @@ void Image::ChangeExponent(float value) {
 	}
 }
 
-void Image::Negative() {
+void myImage::Negative() {
 	for (int y = 0; y < fileHeight; y++)
 	{
 		for (int x = 0; x < fileWidth; x++)
@@ -316,7 +316,7 @@ void Image::Negative() {
 	}
 }
 
-void Image::CalculateHistogram(int sX, int sY, int eX, int eY) {
+void myImage::CalculateHistogram(int sX, int sY, int eX, int eY) {
 	histogram = new float[256];
 	for (int x = 0; x < 256; x++)
 		histogram[x] = 0;
@@ -336,7 +336,7 @@ void Image::CalculateHistogram(int sX, int sY, int eX, int eY) {
 		histogram[x] = histogram[x] / histogramCount;
 }
 
-void Image::ShowHistogram(int threshold) { // wyswietl histogram
+void myImage::ShowHistogram(int threshold) { // wyswietl histogram
 	HistogramWindow dialog;
 	dialog.values = histogram;
 	if (threshold >= 0 && threshold < 256)
@@ -344,7 +344,7 @@ void Image::ShowHistogram(int threshold) { // wyswietl histogram
 	dialog.DoModal();
 }
 
-void Image::EqualizeHistogram() {
+void myImage::EqualizeHistogram() {
 	float dystrybuanta[256] = { 0 };
 	int histogramCount = fileWidth * fileHeight;
 
@@ -377,7 +377,7 @@ void Image::EqualizeHistogram() {
 
 //LAB3
 
-void Image::ManualThreshold(int t)
+void myImage::ManualThreshold(int t)
 {
 	for (int y = 0; y < fileHeight; y++)
 	{
@@ -395,7 +395,7 @@ void Image::ManualThreshold(int t)
 	}
 }
 
-void Image::IterativeSegmentation() {
+void myImage::IterativeSegmentation() {
 	CalculateHistogram(0, 0, fileWidth, fileHeight);
 
 	float t0;
@@ -446,7 +446,7 @@ void Image::IterativeSegmentation() {
 }
 
 
-void Image::GradientSegmentation() {
+void myImage::GradientSegmentation() {
 	CalculateHistogram(0, 0, fileWidth, fileHeight);
 
 	int a = 0;
@@ -469,7 +469,7 @@ void Image::GradientSegmentation() {
 	ShowHistogram(t);
 }
 
-int Image::OtsuSegmentation() {
+int myImage::OtsuSegmentation() {
 	CalculateHistogram(0, 0, fileWidth, fileHeight);
 
 	float sigma[256] = { 0 };
@@ -524,7 +524,7 @@ int Image::OtsuSegmentation() {
 	
 }
 
-void Image::LinearFilter(int mask[3][3], bool maskaWyostrzajaca) {
+void myImage::LinearFilter(int mask[3][3], bool maskaWyostrzajaca) {
 
 	bool minusInMask = false;
 
@@ -578,7 +578,7 @@ void Image::LinearFilter(int mask[3][3], bool maskaWyostrzajaca) {
 	delete []newPixels;
 }
 
-void Image::MedianFilter(int value, int option) { //option 0 3x3 option , option 1 3x3 krzyz
+void myImage::MedianFilter(int value, int option) { //option 0 3x3 option , option 1 3x3 krzyz
 	int size = fileWidth * fileHeight;
 	BYTE* newPixels = new BYTE[size]; // nowe kolory wszystkich pikseli
     int masksize = value * value;
@@ -656,7 +656,7 @@ void Image::MedianFilter(int value, int option) { //option 0 3x3 option , option
 	delete []newPixels;
 }
 
-void Image::LogFilter(int value) {
+void myImage::LogFilter(int value) {
 	float sigma = value / 10.0f;
 
 
@@ -802,7 +802,7 @@ void Image::LogFilter(int value) {
 //	delete[] mask;
 //}
 
-void Image::Pavlidis(HDC context, CRect r) {
+void myImage::Pavlidis(HDC context, CRect r) {
 	int size = fileWidth * fileHeight;
 	int* values = new int[size];
 	for (int x = 0; x < fileWidth; x++) {
@@ -933,7 +933,7 @@ void Image::Pavlidis(HDC context, CRect r) {
 
 }
 
-void Image::MapaOdleglosci(int t) {
+void myImage::MapaOdleglosci(int t) {
 	int size = fileWidth * fileHeight;
 	int* values = new int[size];
 	for (int x = 0; x < fileWidth; x++) {
@@ -980,7 +980,7 @@ void Image::MapaOdleglosci(int t) {
 	delete values;
 }
 
-void Image::Dylatacja() {
+void myImage::Dylatacja() {
 	int size = fileWidth * fileHeight;
 	int* newValues = new int[size];
 
@@ -1017,7 +1017,7 @@ void Image::Dylatacja() {
 	delete []newValues;
 }
 
-void Image::Erozja() {
+void myImage::Erozja() {
 	int size = fileWidth * fileHeight;
 	int* newValues = new int[size];
 
@@ -1055,16 +1055,16 @@ void Image::Erozja() {
 	delete []newValues;
 }
 
-void Image::Otwarcie() {
+void myImage::Otwarcie() {
 	Erozja();
 	Dylatacja();
 }
-void Image::Zamkniecie() {
+void myImage::Zamkniecie() {
 	Dylatacja();
 	Erozja();
 }
 
-void Image::KonturWewnetrzny() {
+void myImage::KonturWewnetrzny() {
 	int size = fileWidth * fileHeight;
 	int* newPixels = new int[size];
 	int* oldPixels = new int[size];
@@ -1098,7 +1098,7 @@ void Image::KonturWewnetrzny() {
 	delete []oldPixels;
 }
 
-void Image::KonturZewnetrzny() {
+void myImage::KonturZewnetrzny() {
 	int size = fileWidth * fileHeight;
 	int* newPixels = new int[size];
 	int* oldPixels = new int[size];
@@ -1131,7 +1131,7 @@ void Image::KonturZewnetrzny() {
 	delete []oldPixels;
 }
 
-void Image::Erozja8() {
+void myImage::Erozja8() {
 	int size = fileWidth * fileHeight;
 	int* newPixels = new int[size];
 
@@ -1166,7 +1166,7 @@ void Image::Erozja8() {
 	delete []newPixels;
 }
 
-void Image::Dylatacja8() {
+void myImage::Dylatacja8() {
 	int size = fileWidth * fileHeight;
 	int* newPixels = new int[size];
 
@@ -1201,16 +1201,16 @@ void Image::Dylatacja8() {
 	delete[]newPixels;
 }
 
-void Image::Zamkniecie8() {
+void myImage::Zamkniecie8() {
 	Dylatacja8();
 	Erozja8();
 }
-void Image::Otwarcie8() {
+void myImage::Otwarcie8() {
 	Erozja8();
 	Dylatacja8();
 }
 
-void Image::WhiteTopHat() {
+void myImage::WhiteTopHat() {
 	int size = fileWidth * fileHeight;
 	int* newPixels = new int[size];
 	int* oldPixels = new int[size];
@@ -1245,7 +1245,7 @@ void Image::WhiteTopHat() {
 	delete[] oldPixels;
 }
 
-void Image::BlackTopHat() {
+void myImage::BlackTopHat() {
 	int size = fileWidth * fileHeight;
 	int* newPixels = new int[size];
 	int* oldPixels = new int[size];
@@ -1282,10 +1282,9 @@ void Image::BlackTopHat() {
 
 # define M_PI           3.14159265358979323846  /* pi */
 
-void Image::HoughWykres(int step) {
+void myImage::HoughWykres(int step) {
 
 	float maxRoHeight = sqrt(pow(fileWidth / 2, 2) + pow(fileHeight / 2, 2));
-	float minRoHeight = 1;
 
 	float ro = 0.0;
 
@@ -1307,9 +1306,9 @@ void Image::HoughWykres(int step) {
 	{
 		for (int x = 0; x < fileWidth; x++)
 		{
-			if (GetPixel8(x, y) == 0) // jesli piksel jest czarny
+			if (GetPixel8(x, y) == 0)
 			{
-				int yi = y - fileHeight / 2;
+				int yi = y - fileHeight / 2; 
 				int xi = x - fileWidth / 2;
 
 				for (int deg = 0; deg < 360; deg += step)
@@ -1343,8 +1342,14 @@ void Image::HoughWykres(int step) {
 			}
 		}
 	}
+	int color = 255;
+	if (maxPrzeciecia != 0) {
+		color = 255 / maxPrzeciecia;
+	}
+	else {
+		color = 255;
+	}
 
-	int color = 255 / maxPrzeciecia;
 	CreateGreyscaleDIBWhite(new CRect(0, 0, widthOfAkumulator, heightOfAkumulator), 0, 0); // stworz pusty bialy obraz o rozmiarach akumulatora
 
 	for (int i = 0; i < widthOfAkumulator; i += step) // rysuj wykres z przecieciami
@@ -1359,7 +1364,7 @@ void Image::HoughWykres(int step) {
 				{
 					if (i+k <= 0 || i+k >= fileWidth || j <= 0 || j >= fileHeight)
 						continue;
-					SetPixel8(i + k, j, Floor(255 - color*przeciecia - 10)); // im wieksza wartosc w akumulatorze tym ciemniejsze
+					SetPixel8(i+k , j, Floor(255 - color*przeciecia-5)); // im wieksza wartosc w akumulatorze tym ciemniejsze
 				}
 			}
 			else
@@ -1379,7 +1384,7 @@ void Image::HoughWykres(int step) {
 	delete[] akumulator;
 }
 
-void Image::Hough(int step, int parameter) { // parameter -> ile linii narysowac / ile krawedzi wykrywac
+void myImage::Hough(int step, int parameter) { // parameter -> ile linii narysowac / ile krawedzi wykrywac
 	float maxRoHeight = sqrt(pow(fileWidth / 2, 2) + pow(fileHeight / 2, 2));
 
 	float ro = 0.0;
@@ -1397,12 +1402,12 @@ void Image::Hough(int step, int parameter) { // parameter -> ile linii narysowac
 			akumulator[i][j] = 0;
 		}
 	}
-
+	
 	for (int y = 0; y < fileHeight; y++)
 	{
 		for (int x = 0; x < fileWidth; x++)
 		{
-			if (GetPixel8(x, y) == 0) // jesli piksel jest czarny
+			if (GetPixel8(x, y) == 0)
 			{
 				int yi = y - fileHeight / 2;
 				int xi = x - fileWidth / 2;
@@ -1428,6 +1433,7 @@ void Image::Hough(int step, int parameter) { // parameter -> ile linii narysowac
 		int maxPrzeciecia = 0;
 		int maxDeg = 0;
 		int maxRo = 0;
+		int counter = 0;
 
 		for (int i = 0; i < widthOfAkumulator; i++) // wyznacz maksymalna wartosc w akumulatorze 
 		{
@@ -1440,14 +1446,31 @@ void Image::Hough(int step, int parameter) { // parameter -> ile linii narysowac
 					maxPrzeciecia = przeciecia; // najwieksza ilosc przeciec
 					maxDeg = i; // wartosc kata theta dla max wartosci
 					maxRo = j; // wartosc ro dla tego kata
+					counter++;
 				}
 			}
 		}
 		tabMaxPrzeciecia.push_back(maxPrzeciecia);
 		tabMaxDeg.push_back(maxDeg);
 		tabMaxRo.push_back(maxRo);
-		akumulator[maxDeg][maxRo] = 0; //wyzeruj zeby nie powtarzac znowu tego samego maksimum
-		//TODO wyzerowac sasiadow tak jak opisane w instrukcji
+		//akumulator[maxDeg][maxRo] = 0;
+		// zeruj otoczenie wyznaczonego maxa tak dlugo dopoki nie natrafimy na piksel ktorego wartosc jest mniejsza niz 1/10 maxa.
+		int maskSize = 1;
+		bool found = false;
+		while (!found) {
+			for (int i = -maskSize; i < maskSize + 1; i++) {
+				for (int j = -maskSize; j < maskSize + 1; j++) {
+					if (maxDeg + i < 0 || maxDeg + i >= widthOfAkumulator || maxRo + j < 0 || maxRo + j >= heightOfAkumulator) {
+						continue;
+					}
+					akumulator[maxDeg + i][maxRo + j] = 0;
+					if (akumulator[maxDeg + i][maxRo + j] < maxPrzeciecia / 10 || maskSize >= 100) {
+						found = true;
+					}
+				}
+			}
+			maskSize++;
+		}
 	}
 	float offset = 0.5; // jak grube ma byc zaznaczenie linii
 
@@ -1477,4 +1500,351 @@ void Image::Hough(int step, int parameter) { // parameter -> ile linii narysowac
 	for (int i = 0; i < widthOfAkumulator; ++i)
 		delete akumulator[i];
 	delete[] akumulator;
+}
+
+//void Image::Hough(int step, int parameter) { // parameter -> ile linii narysowac / ile krawedzi wykrywac // hough z automatycznym wykrywaniem krawedzi
+//	float maxRoHeight = sqrt(pow(fileWidth / 2, 2) + pow(fileHeight / 2, 2));
+//
+//	float ro = 0.0;
+//
+//	int widthOfAkumulator = 360;
+//	int heightOfAkumulator = int(maxRoHeight) + 1;
+//
+//	int** akumulator = new int* [widthOfAkumulator];
+//	for (int i = 0; i < widthOfAkumulator; i++) {
+//		akumulator[i] = new int[heightOfAkumulator];
+//	}
+//
+//	for (int i = 0; i < widthOfAkumulator; i++) {
+//		for (int j = 0; j < heightOfAkumulator; j++) {
+//			akumulator[i][j] = 0;
+//		}
+//	}
+//
+//	for (int y = 0; y < fileHeight; y++)
+//	{
+//		for (int x = 0; x < fileWidth; x++)
+//		{
+//			if (GetPixel8(x, y) == 0)
+//			{
+//				int yi = y - fileHeight / 2;
+//				int xi = x - fileWidth / 2;
+//
+//				for (int deg = 0; deg < 360; deg += step)
+//				{
+//					ro = xi * cos((M_PI / 180) * deg) + yi * sin((M_PI / 180) * deg);
+//
+//					if (ro < 0)
+//						continue;
+//
+//					akumulator[deg][int(ro)]++;
+//				}
+//			}
+//		}
+//	}
+//
+//	vector<int> tabMaxPrzeciecia;
+//	vector<int> tabMaxDeg;
+//	vector<int> tabMaxRo;
+//	int a = 0;
+//	int counterPetla = 0;
+//	int maxGlobal = 0;
+//	int counter = 0;
+//	do{
+//	//for (int p = 0; p < parameter; p++) {
+//		int maxPrzeciecia = 0;
+//		int maxDeg = 0;
+//		int maxRo = 0;
+//
+//		for (int i = 0; i < widthOfAkumulator; i++) // wyznacz maksymalna wartosc w akumulatorze 
+//		{
+//			for (int j = 0; j < heightOfAkumulator; j++)
+//			{
+//				int przeciecia = akumulator[i][j];
+//
+//				if (przeciecia > maxPrzeciecia)
+//				{
+//					
+//					a = przeciecia;
+//					maxPrzeciecia = przeciecia; // najwieksza ilosc przeciec
+//					maxDeg = i; // wartosc kata theta dla max wartosci
+//					maxRo = j; // wartosc ro dla tego kata
+//				}
+//			}
+//		}
+//		if (counter == 0) { maxGlobal = maxPrzeciecia; }
+//		counter++;
+//		tabMaxPrzeciecia.push_back(maxPrzeciecia);
+//		tabMaxDeg.push_back(maxDeg);
+//		tabMaxRo.push_back(maxRo);
+//		//akumulator[maxDeg][maxRo] = 0;
+//		// zeruj otoczenie wyznaczonego maxa tak dlugo dopoki nie natrafimy na piksel ktorego wartosc jest mniejsza niz 1/10 maxa.
+//		int maskSize = 1;
+//		bool found = false;
+//		while (!found) {
+//			for (int i = -maskSize; i < maskSize + 1; i++) {
+//				for (int j = -maskSize; j < maskSize + 1; j++) {
+//					if (maxDeg + i < 0 || maxDeg + i >= widthOfAkumulator || maxRo + j < 0 || maxRo + j >= heightOfAkumulator) {
+//						continue;
+//					}
+//					akumulator[maxDeg + i][maxRo + j] = 0;
+//					if (akumulator[maxDeg + i][maxRo + j] < maxPrzeciecia / 10) {
+//						found = true;
+//					}
+//				}
+//			}
+//			maskSize++;
+//		}
+//		counterPetla++;
+//	} while (a >= maxGlobal / 2 );
+//	float offset = 0.5; // jak grube ma byc zaznaczenie linii
+//
+//
+//	for (int p = 0; p < counterPetla; p++) {
+//
+//		for (int y = 0; y < fileHeight; y++)
+//		{
+//			for (int x = 0; x < fileWidth; x++)
+//			{
+//				int yi = y - fileHeight / 2;
+//				int xi = x - fileWidth / 2;
+//
+//				float r = (xi * cos((M_PI / 180) * tabMaxDeg[p]) + yi * sin((M_PI / 180) * tabMaxDeg[p]));
+//
+//				if (r > 0)
+//				{
+//					if (r >= tabMaxRo[p] - offset && r <= tabMaxRo[p] + offset)
+//					{
+//						SetPixel8(x, y, 150); // zaznacz na szaro zeby bylo widoczne
+//					}
+//				}
+//			}
+//		}
+//	}
+//
+//	for (int i = 0; i < widthOfAkumulator; ++i)
+//		delete akumulator[i];
+//	delete[] akumulator;
+//}
+
+void myImage::Hamming()
+{
+	float alpha = 0.53836f;
+	float beta = 1 - alpha;
+
+	float N = sqrt(fileWidth*fileWidth + fileHeight*fileHeight);
+
+	for (int y = 0; y < fileHeight; y++)
+	{
+		for (int x = 0; x < fileWidth; x++)
+		{
+			int xi = x - fileWidth / 2;
+			int yi = y - fileHeight / 2;
+
+
+			float r = sqrt(xi*xi + yi*yi);
+			float n = N / 2 - r;
+
+			float w = alpha - beta * cos((2 * M_PI * n) / (N - 1));
+
+			byte pixel = GetPixel8(x, y);
+
+			SetPixel8(x, y, Floor(w * pixel));
+		}
+	}
+}
+
+#include <map>
+
+void myImage::FourierAmplituda()
+{
+	Hamming();
+
+	double pixel;
+
+	typedef pair<int, int> Key;
+	typedef pair<double, double> Value;
+
+	map<Key, Value> fourierMap;
+	map<Key, Value> fourierMapCwiartki;
+	double wynik = 0;
+	double wynikReal = 0.0;
+	double wynikImagine = 0.0;
+	double result;
+
+	for (int v = 0; v < fileHeight; v++)
+	{
+		for (int u = 0; u < fileWidth; u++)
+		{
+			wynikReal = 0;
+			wynikImagine = 0;
+
+			for (int y = 0; y < fileHeight; y++)
+			{
+				for (int x = 0; x < fileWidth; x++)
+				{
+					result = 2 * M_PI * (float)((float)(u * x) / (float)fileWidth + (float)(v * y) / (float)fileHeight);
+					pixel = GetPixel8(x, y);
+					wynikReal += (pixel * (cos(result)));
+					wynikImagine -= (pixel * sin(result));
+				}
+			}
+
+			Key klucz(u, v);
+			Value wartosc(wynikReal, wynikImagine);
+			fourierMap[klucz] = wartosc;
+		}
+	}
+
+	// Odwrócenie æwiartek
+	for (int y = 0; y < fileHeight; y++)
+	{
+		for (int x = 0; x < fileWidth; x++)
+		{
+			Key klucz1(x, y);
+			Key klucz2;
+			double w = fileWidth / 2;
+			double h = fileHeight / 2;
+
+			if (x < w && y < h)
+			{
+				klucz2.first = x + w;
+				klucz2.second = y + h;
+			}
+			if (x >= w && y < h)
+			{
+				klucz2.first = x - w;
+				klucz2.second = y + h;
+			}
+			if (x >= w && y >= h)
+			{
+				klucz2.first = x - w;
+				klucz2.second = y - h;
+			}
+			if (x < w && y >= h)
+			{
+				klucz2.first = x + w;
+				klucz2.second = y - h;
+			}
+
+			fourierMapCwiartki[klucz2] = fourierMap[klucz1];
+		}
+	}
+
+	// Wyœwietlenie wyniku
+	for (int y = 0; y < fileHeight; y++)
+	{
+		for (int x = 0; x < fileWidth; x++)
+		{
+			Key k(x, y);
+			double real = fourierMapCwiartki[k].first;
+			double imag = fourierMapCwiartki[k].second;
+
+			wynik = abs(sqrt(pow(real, 2) + pow(imag, 2)));
+			wynik = log(1 + wynik);
+			wynik = (wynik * 255 / 14);
+
+			SetPixel8(x, y, Floor((float)wynik));
+		}
+	}
+}
+
+void myImage::FourierFaza()
+{
+	Hamming();
+	double pixel;
+
+	typedef pair<int, int> Key;
+	typedef pair<double, double> Value;
+
+	map<Key, Value> fourierMap;
+	map<Key, Value> fourierMapCwiartki;
+	double wynik = 0;
+	double wynikReal = 0.0;
+	double wynikImagine = 0.0;
+	double result;
+
+	for (int v = 0; v < fileHeight; v++)
+	{
+		for (int u = 0; u < fileWidth; u++)
+		{
+			wynikReal = 0;
+			wynikImagine = 0;
+
+			for (int y = 0; y < fileHeight; y++)
+			{
+				for (int x = 0; x < fileWidth; x++)
+				{
+					result = 2 * M_PI * (float)((float)(u * x) / (float)fileWidth + (float)(v * y) / (float)fileHeight);
+
+					pixel = GetPixel8(x, y);
+
+					wynikReal += (pixel * (cos(result)));
+					wynikImagine -= (pixel * sin(result));
+				}
+			}
+
+			Key klucz(u, v);
+			Value wartosc(wynikReal, wynikImagine);
+			fourierMap[klucz] = wartosc;
+		}
+	}
+
+	// Odwrócenie æwiartek
+	for (int y = 0; y < fileHeight; y++)
+	{
+		for (int x = 0; x < fileWidth; x++)
+		{
+			Key klucz1(x, y);
+			Key klucz2;
+			double w = fileWidth / 2;
+			double h = fileHeight / 2;
+
+			if (x < w && y < h)
+			{
+				klucz2.first = x + w;
+				klucz2.second = y + h;
+			}
+			if (x >= w && y < h)
+			{
+				klucz2.first = x - w;
+				klucz2.second = y + h;
+			}
+			if (x >= w && y >= h)
+			{
+				klucz2.first = x - w;
+				klucz2.second = y - h;
+			}
+			if (x < w && y >= h)
+			{
+				klucz2.first = x + w;
+				klucz2.second = y - h;
+			}
+
+			fourierMapCwiartki[klucz2] = fourierMap[klucz1];
+		}
+	}
+
+	// Wyœwietlenie wyniku
+	for (int y = 0; y < fileHeight; y++)
+	{
+		for (int x = 0; x < fileWidth; x++)
+		{
+			Key k(x, y);
+			double real = fourierMapCwiartki[k].first;
+			double imag = fourierMapCwiartki[k].second;
+
+			if (real < 0.0001 && real >0)
+				real = M_PI / 2;
+			if (real > -0.0001 && real < 0)
+				real = -M_PI / 2;
+
+			double tangensWyn = imag / real;
+			wynik = atan(tangensWyn);
+
+			wynik = ((wynik + 1) * 255 / 2);
+
+			SetPixel8(x, y, Floor((float)wynik));
+		}
+	}
 }

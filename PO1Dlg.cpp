@@ -164,6 +164,11 @@ BOOL CPODlg::OnInitDialog()
 	m_combo1.AddString(L"lab7_hough wykres");
 	m_combo1.AddString(L"lab7_hough");
 
+	m_combo1.AddString(L"lab8_hamming");
+	m_combo1.AddString(L"lab8_fourier faza");
+	m_combo1.AddString(L"lab8_fourier amplituda");
+
+
 
 
 	m_combo1.SelectString(0, L"lab1_convert to greyscale");
@@ -421,6 +426,18 @@ void CPODlg::OnBnClickedButtonProcess()
 	else if (sOption == L"lab7_hough") {
 	m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
 	m_imgOUT.Image.Hough(slider.GetPos(), parameter);
+	}
+	else if (sOption == L"lab8_hamming") {
+	m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+	m_imgOUT.Image.Hamming();
+	}
+	else if (sOption == L"lab8_fourier amplituda") {
+	m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+	m_imgOUT.Image.FourierAmplituda();
+	}
+	else if (sOption == L"lab8_fourier faza") {
+	m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+	m_imgOUT.Image.FourierFaza();
 	}
 	
 	InvalidateRect(NULL);
