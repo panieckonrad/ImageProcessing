@@ -1804,60 +1804,60 @@ void myImage::FourierAmplituda()
 //			}
 //		}
 //	}
-
-	//for (int v = 0; v < fileHeight; v++)
-	//{
-	//	for (int u = 0; u < fileWidth; u++)
-	//	{
-	//		valueReal = 0;
-	//		valueImagined = 0;
-
-	//		for (int y = 0; y < fileHeight; y++)
-	//		{
-	//			for (int x = 0; x < fileWidth; x++)
-	//			{
-	//				pixel = GetPixel8(x, y);
-	//				result = 2 * M_PI * (float)((float)(u * x) / (float)fileWidth + (float)(v * y) / (float)fileHeight);
-	//				valueReal += (pixel * cos(result));
-	//				valueImagined -= (pixel * sin(result));
-	//			}
-	//		}
-
-	//		uv uv(u, v);
-	//		ComplexNumber number(valueReal, valueImagined);
-	//		fourier[uv] = number;
-	//	}
-	//}
-
-
-	//
-
-	//vector <double> v;
-	//int max = -99999;
-	//for (int y = 0; y < fileHeight; y++)
-	//{
-	//	for (int x = 0; x < fileWidth; x++)
-	//	{
-	//		uv uv(x, y);
-	//		double real = fourier[uv].first;
-	//		double imag = fourier[uv].second;
-	//		value = abs(sqrt(real * real + imag * imag)); // modul z 
-	//		value = log(1 + value);
-	//		if (value > max) {
-	//			max = value;
-	//		}
-	//		v.push_back(value);
-	//	}
-	//}
-	//int counter = 0;
-	//for (int y = 0; y < fileHeight; y++) {
-	//	for (int x = 0; x < fileWidth; x++) {
-
-	//		value = v[counter++] * 255 / max; // skalowanie
-
-	//		SetPixel8(x, y, Floor((float)value));
-	//	}
-	//}
+//
+//	for (int v = 0; v < fileHeight; v++)
+//	{
+//		for (int u = 0; u < fileWidth; u++)
+//		{
+//			valueReal = 0;
+//			valueImagined = 0;
+//
+//			for (int y = 0; y < fileHeight; y++)
+//			{
+//				for (int x = 0; x < fileWidth; x++)
+//				{
+//					pixel = GetPixel8(x, y);
+//					result = 2 * M_PI * (float)((float)(u * x) / (float)fileWidth + (float)(v * y) / (float)fileHeight);
+//					valueReal += (pixel * cos(result));
+//					valueImagined -= (pixel * sin(result));
+//				}
+//			}
+//
+//			uv uv(u, v);
+//			ComplexNumber number(valueReal, valueImagined);
+//			fourier[uv] = number;
+//		}
+//	}
+//
+//
+//	
+//
+//	vector <double> v;
+//	int max = -99999;
+//	for (int y = 0; y < fileHeight; y++)
+//	{
+//		for (int x = 0; x < fileWidth; x++)
+//		{
+//			uv uv(x, y);
+//			double real = fourier[uv].first;
+//			double imag = fourier[uv].second;
+//			value = abs(sqrt(real * real + imag * imag)); // modul z 
+//			value = log(1 + value);
+//			if (value > max) {
+//				max = value;
+//			}
+//			v.push_back(value);
+//		}
+//	}
+//	int counter = 0;
+//	for (int y = 0; y < fileHeight; y++) {
+//		for (int x = 0; x < fileWidth; x++) {
+//
+//			value = v[counter++] * 255 / max; // skalowanie
+//
+//			SetPixel8(x, y, Floor((float)value));
+//		}
+//	}
 //}
 #include<complex>
 void myImage::FourierFaza()
@@ -1935,30 +1935,33 @@ void myImage::FourierFaza()
 			double real = fourierReordered[uv].first;
 			double imagined = fourierReordered[uv].second;
 
-			std::complex<double> complexNumber(real, imagined);
-			value = arg(complexNumber);
+			//std::complex<double> complexNumber(real, imagined);
+			//value = arg(complexNumber);
 
 			//if (real < 0.0001 && real >0)
 			//	real = M_PI / 2;
 			//if (real > -0.0001 && real < 0)
 			//	real = -M_PI / 2;
 
-			//double tangensValue = imagined / real;
+			double tangensValue = imagined / real;
 			//if (tangensValue > 0) {
-			//	value = atan(tangensValue);
+			value = atan(tangensValue);
 			//}
 			//else {
 			//	value = atan(tangensValue) + M_PI;
 			//}
 
-			//if (real < -0.001 && imagined >0)
+			//if (real < 0.001 && imagined >0)
 			//	value = M_PI / 2;
-			//if (real < -0.001 && imagined <0)
+			//else if (real < 0.001 && imagined <0)
 			//	value = -M_PI / 2;
+			if (real < 0.0001 && real >0)
+				value = M_PI / 2;
+			if (real > -0.0001 && real < 0)
+				value = -M_PI / 2;
 
-
-			value = ((value+M_PI/2) * 255 / 3); 
-			//value = ((value + (M_PI / 2)) / M_PI)*255;
+			//value = ((value+M_PI/2) * 255 / 3); 
+			value = ((value + (M_PI / 2)) / M_PI)*255;
 
 			SetPixel8(x, y, Floor((float)value));
 		}
