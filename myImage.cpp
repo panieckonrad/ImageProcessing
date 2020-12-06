@@ -3,7 +3,7 @@
 #include "Math.h"
 #include "HistogramWindow.h"
 #include <vector>
-#include <vector>
+#include <map>
 using namespace std;
 
 myImage::myImage()
@@ -1654,197 +1654,313 @@ void myImage::Hamming()
 	}
 }
 
-#include <map>
-
 void myImage::FourierAmplituda()
 {
 	Hamming();
-
 	double pixel;
-
-	typedef pair<int, int> Key;
-	typedef pair<double, double> Value;
-
-	map<Key, Value> fourierMap;
-	map<Key, Value> fourierMapCwiartki;
-	double wynik = 0;
-	double wynikReal = 0.0;
-	double wynikImagine = 0.0;
+    typedef pair<int, int> uv;
+	typedef pair<double, double> ComplexNumber;
+	double value = 0;
+	double valueReal = 0.0;
+	double valueImagined = 0.0;
 	double result;
+	map<uv, ComplexNumber> fourier;
+	map<uv, ComplexNumber> fourierReordered;
 
 	for (int v = 0; v < fileHeight; v++)
 	{
 		for (int u = 0; u < fileWidth; u++)
 		{
-			wynikReal = 0;
-			wynikImagine = 0;
+			valueReal = 0;
+			valueImagined = 0;
 
 			for (int y = 0; y < fileHeight; y++)
 			{
 				for (int x = 0; x < fileWidth; x++)
 				{
-					result = 2 * M_PI * (float)((float)(u * x) / (float)fileWidth + (float)(v * y) / (float)fileHeight);
 					pixel = GetPixel8(x, y);
-					wynikReal += (pixel * (cos(result)));
-					wynikImagine -= (pixel * sin(result));
+					result = 2 * M_PI * (float)((float)(u * x) / (float)fileWidth + (float)(v * y) / (float)fileHeight);
+					valueReal += (pixel * cos(result));
+					valueImagined -= (pixel * sin(result));
 				}
 			}
 
-			Key klucz(u, v);
-			Value wartosc(wynikReal, wynikImagine);
-			fourierMap[klucz] = wartosc;
+			uv uv(u, v);
+			ComplexNumber number(valueReal, valueImagined);
+			fourier[uv] = number;
 		}
 	}
 
-	// Odwrócenie æwiartek
+	double w = fileWidth / 2;
+	double h = fileHeight / 2;
+
+	for (int y = 0; y < fileHeight; y++) // PRZENOSZENIE CWIARTEK
+	{
+		for (int x = 0; x < fileWidth; x++)
+		{
+			uv uv1(x, y);
+			uv uv2;
+
+			if (x < w && y < h) //A
+			{
+				uv2= uv(x + w, y + h); 
+			}
+			else if (x >= w && y < h) //  B
+			{
+				uv2 = uv(x - w, y + h);
+			}
+			else if (x < w && y >= h) //C
+			{
+				uv2 = uv(x + w, y - h);
+			}
+			else if (x >= w && y >= h) // D
+			{
+				uv2 = uv(x - w, y - h);
+			}
+		
+
+			fourierReordered[uv2] = fourier[uv1];
+		}
+	}
+
+	vector <double> v;
+	int max = -99999;
 	for (int y = 0; y < fileHeight; y++)
 	{
 		for (int x = 0; x < fileWidth; x++)
 		{
-			Key klucz1(x, y);
-			Key klucz2;
-			double w = fileWidth / 2;
-			double h = fileHeight / 2;
-
-			if (x < w && y < h)
-			{
-				klucz2.first = x + w;
-				klucz2.second = y + h;
+			uv uv(x, y);
+			double real = fourierReordered[uv].first;
+			double imag = fourierReordered[uv].second;
+			value = abs(sqrt(real * real + imag * imag)); // modul z 
+			value = log(1 + value);
+			if (value > max) {
+				max = value;
 			}
-			if (x >= w && y < h)
-			{
-				klucz2.first = x - w;
-				klucz2.second = y + h;
-			}
-			if (x >= w && y >= h)
-			{
-				klucz2.first = x - w;
-				klucz2.second = y - h;
-			}
-			if (x < w && y >= h)
-			{
-				klucz2.first = x + w;
-				klucz2.second = y - h;
-			}
-
-			fourierMapCwiartki[klucz2] = fourierMap[klucz1];
+			v.push_back(value);
 		}
 	}
+	int counter = 0;
+	for(int y = 0; y < fileHeight; y++){
+		for(int x = 0; x<fileWidth; x++){
 
-	// Wyœwietlenie wyniku
-	for (int y = 0; y < fileHeight; y++)
-	{
-		for (int x = 0; x < fileWidth; x++)
-		{
-			Key k(x, y);
-			double real = fourierMapCwiartki[k].first;
-			double imag = fourierMapCwiartki[k].second;
+			value = v[counter++]*255/max; // skalowanie
 
-			wynik = abs(sqrt(pow(real, 2) + pow(imag, 2)));
-			wynik = log(1 + wynik);
-			wynik = (wynik * 255 / 14);
-
-			SetPixel8(x, y, Floor((float)wynik));
+			SetPixel8(x, y, Floor((float)value));
 		}
 	}
 }
 
+//void myImage::FourierAmplituda()
+//{
+//	Hamming();
+//	double pixel;
+//	typedef pair<int, int> uv;
+//	typedef pair<double, double> ComplexNumber;
+//	double value = 0;
+//	double valueReal = 0.0;
+//	double valueImagined = 0.0;
+//	double result;
+//	map<uv, ComplexNumber> fourier;
+//	map<uv, ComplexNumber> fourierReordered;
+//
+//
+//	int w = fileWidth / 2;
+//	int h = fileHeight / 2;
+//	
+//	int tab[200][200];
+//
+//	for (int y = 0; y < fileHeight; y++) // PRZENOSZENIE CWIARTEK
+//	{
+//		for (int x = 0; x < fileWidth; x++)
+//		{
+//			tab[x][y] = GetPixel8(x, y);
+//		}
+//	}
+//
+//
+//
+//	for (int y = 0; y < fileHeight; y++) // PRZENOSZENIE CWIARTEK
+//	{
+//		for (int x = 0; x < fileWidth; x++)
+//		{
+//
+//			if (x < w && y < h) //A
+//			{
+//
+//				SetPixel8(x + w, y + h, tab[x][y]);
+//			}
+//			if (x >= w && y < h) //  B
+//			{
+//				SetPixel8(x - w, y + h, tab[x][y]);
+//			}
+//			if (x < w && y >= h) //C
+//			{
+//				SetPixel8(x + w, y - h, tab[x][y]);
+//			}
+//			if (x >= w && y >= h) // D
+//			{
+//				SetPixel8(x - w, y - h, tab[x][y]);
+//			}
+//		}
+//	}
+
+	//for (int v = 0; v < fileHeight; v++)
+	//{
+	//	for (int u = 0; u < fileWidth; u++)
+	//	{
+	//		valueReal = 0;
+	//		valueImagined = 0;
+
+	//		for (int y = 0; y < fileHeight; y++)
+	//		{
+	//			for (int x = 0; x < fileWidth; x++)
+	//			{
+	//				pixel = GetPixel8(x, y);
+	//				result = 2 * M_PI * (float)((float)(u * x) / (float)fileWidth + (float)(v * y) / (float)fileHeight);
+	//				valueReal += (pixel * cos(result));
+	//				valueImagined -= (pixel * sin(result));
+	//			}
+	//		}
+
+	//		uv uv(u, v);
+	//		ComplexNumber number(valueReal, valueImagined);
+	//		fourier[uv] = number;
+	//	}
+	//}
+
+
+	//
+
+	//vector <double> v;
+	//int max = -99999;
+	//for (int y = 0; y < fileHeight; y++)
+	//{
+	//	for (int x = 0; x < fileWidth; x++)
+	//	{
+	//		uv uv(x, y);
+	//		double real = fourier[uv].first;
+	//		double imag = fourier[uv].second;
+	//		value = abs(sqrt(real * real + imag * imag)); // modul z 
+	//		value = log(1 + value);
+	//		if (value > max) {
+	//			max = value;
+	//		}
+	//		v.push_back(value);
+	//	}
+	//}
+	//int counter = 0;
+	//for (int y = 0; y < fileHeight; y++) {
+	//	for (int x = 0; x < fileWidth; x++) {
+
+	//		value = v[counter++] * 255 / max; // skalowanie
+
+	//		SetPixel8(x, y, Floor((float)value));
+	//	}
+	//}
+//}
+#include<complex>
 void myImage::FourierFaza()
 {
 	Hamming();
 	double pixel;
-
-	typedef pair<int, int> Key;
-	typedef pair<double, double> Value;
-
-	map<Key, Value> fourierMap;
-	map<Key, Value> fourierMapCwiartki;
-	double wynik = 0;
-	double wynikReal = 0.0;
-	double wynikImagine = 0.0;
+	typedef pair<int, int> uv;
+	typedef pair<double, double> ComplexNumber;
+	double value = 0;
+	double valueReal = 0.0;
+	double valueImagined = 0.0;
 	double result;
+	map<uv, ComplexNumber> fourier;
+	map<uv, ComplexNumber> fourierReordered;
 
 	for (int v = 0; v < fileHeight; v++)
 	{
 		for (int u = 0; u < fileWidth; u++)
 		{
-			wynikReal = 0;
-			wynikImagine = 0;
+			valueReal = 0;
+			valueImagined = 0;
 
 			for (int y = 0; y < fileHeight; y++)
 			{
 				for (int x = 0; x < fileWidth; x++)
 				{
 					result = 2 * M_PI * (float)((float)(u * x) / (float)fileWidth + (float)(v * y) / (float)fileHeight);
-
 					pixel = GetPixel8(x, y);
-
-					wynikReal += (pixel * (cos(result)));
-					wynikImagine -= (pixel * sin(result));
+					valueReal += (pixel * (cos(result)));
+					valueImagined -= (pixel * sin(result));
 				}
 			}
-
-			Key klucz(u, v);
-			Value wartosc(wynikReal, wynikImagine);
-			fourierMap[klucz] = wartosc;
+			uv uv(u, v);
+			ComplexNumber number(valueReal, valueImagined);
+			fourier[uv] = number;
 		}
 	}
 
-	// Odwrócenie æwiartek
-	for (int y = 0; y < fileHeight; y++)
+	double w = fileWidth / 2;
+	double h = fileHeight / 2;
+
+	for (int y = 0; y < fileHeight; y++) // PRZENOSZENIE CWIARTEK
 	{
 		for (int x = 0; x < fileWidth; x++)
 		{
-			Key klucz1(x, y);
-			Key klucz2;
-			double w = fileWidth / 2;
-			double h = fileHeight / 2;
+			uv uv1(x, y);
+			uv uv2;
 
 			if (x < w && y < h)
 			{
-				klucz2.first = x + w;
-				klucz2.second = y + h;
+				uv2 = uv(x + w, y + h);
 			}
 			if (x >= w && y < h)
 			{
-				klucz2.first = x - w;
-				klucz2.second = y + h;
+				uv2 = uv(x - w, y + h);
 			}
 			if (x >= w && y >= h)
 			{
-				klucz2.first = x - w;
-				klucz2.second = y - h;
+				uv2 = uv(x - w, y - h);
 			}
 			if (x < w && y >= h)
 			{
-				klucz2.first = x + w;
-				klucz2.second = y - h;
+				uv2 = uv(x + w, y - h);
 			}
 
-			fourierMapCwiartki[klucz2] = fourierMap[klucz1];
+			fourierReordered[uv2] = fourier[uv1];
 		}
 	}
 
-	// Wyœwietlenie wyniku
 	for (int y = 0; y < fileHeight; y++)
 	{
 		for (int x = 0; x < fileWidth; x++)
 		{
-			Key k(x, y);
-			double real = fourierMapCwiartki[k].first;
-			double imag = fourierMapCwiartki[k].second;
+			uv uv(x, y);
+			double real = fourierReordered[uv].first;
+			double imagined = fourierReordered[uv].second;
 
-			if (real < 0.0001 && real >0)
-				real = M_PI / 2;
-			if (real > -0.0001 && real < 0)
-				real = -M_PI / 2;
+			std::complex<double> complexNumber(real, imagined);
+			value = arg(complexNumber);
 
-			double tangensWyn = imag / real;
-			wynik = atan(tangensWyn);
+			//if (real < 0.0001 && real >0)
+			//	real = M_PI / 2;
+			//if (real > -0.0001 && real < 0)
+			//	real = -M_PI / 2;
 
-			wynik = ((wynik + 1) * 255 / 2);
+			//double tangensValue = imagined / real;
+			//if (tangensValue > 0) {
+			//	value = atan(tangensValue);
+			//}
+			//else {
+			//	value = atan(tangensValue) + M_PI;
+			//}
 
-			SetPixel8(x, y, Floor((float)wynik));
+			//if (real < -0.001 && imagined >0)
+			//	value = M_PI / 2;
+			//if (real < -0.001 && imagined <0)
+			//	value = -M_PI / 2;
+
+
+			value = ((value+M_PI/2) * 255 / 3); 
+			//value = ((value + (M_PI / 2)) / M_PI)*255;
+
+			SetPixel8(x, y, Floor((float)value));
 		}
 	}
 }
