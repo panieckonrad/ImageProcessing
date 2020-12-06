@@ -1860,6 +1860,107 @@ void myImage::FourierAmplituda()
 //	}
 //}
 #include<complex>
+//void myImage::FourierFaza()
+//{
+//	Hamming();
+//	double pixel;
+//	typedef pair<int, int> uv;
+//	typedef pair<double, double> ComplexNumber;
+//	double value = 0;
+//	double valueReal = 0.0;
+//	double valueImagined = 0.0;
+//	double result;
+//	map<uv, ComplexNumber> fourier;
+//	map<uv, ComplexNumber> fourierReordered;
+//
+//	for (int v = 0; v < fileHeight; v++)
+//	{
+//		for (int u = 0; u < fileWidth; u++)
+//		{
+//			valueReal = 0;
+//			valueImagined = 0;
+//
+//			for (int y = 0; y < fileHeight; y++)
+//			{
+//				for (int x = 0; x < fileWidth; x++)
+//				{
+//					result = 2 * M_PI * (float)((float)(u * x) / (float)fileWidth + (float)(v * y) / (float)fileHeight);
+//					pixel = GetPixel8(x, y);
+//					valueReal += (pixel * (cos(result)));
+//					valueImagined -= (pixel * sin(result));
+//				}
+//			}
+//			uv uv(u, v);
+//			ComplexNumber number(valueReal, valueImagined);
+//			fourier[uv] = number;
+//		}
+//	}
+//
+//	double w = fileWidth / 2;
+//	double h = fileHeight / 2;
+//
+//	for (int y = 0; y < fileHeight; y++) // PRZENOSZENIE CWIARTEK
+//	{
+//		for (int x = 0; x < fileWidth; x++)
+//		{
+//			uv uv1(x, y);
+//			uv uv2;
+//
+//			if (x < w && y < h)
+//			{
+//				uv2 = uv(x + w, y + h);
+//			}
+//			if (x >= w && y < h)
+//			{
+//				uv2 = uv(x - w, y + h);
+//			}
+//			if (x >= w && y >= h)
+//			{
+//				uv2 = uv(x - w, y - h);
+//			}
+//			if (x < w && y >= h)
+//			{
+//				uv2 = uv(x + w, y - h);
+//			}
+//
+//			fourierReordered[uv2] = fourier[uv1];
+//		}
+//	}
+//
+//	for (int y = 0; y < fileHeight; y++)
+//	{
+//		for (int x = 0; x < fileWidth; x++)
+//		{
+//			uv uv(x, y);
+//			double real = fourierReordered[uv].first;
+//			double imagined = fourierReordered[uv].second;
+//
+//			//std::complex<double> complexNumber(real, imagined);
+//			//value = arg(complexNumber);
+//
+//			double tangensValue = imagined / real;
+//			//if (tangensValue > 0) {
+//			value = atan(tangensValue);
+//			//}
+//			//else {
+//			//	value = atan(tangensValue) + M_PI;
+//			//}
+//			if (real < 0.001 && imagined >0)
+//				value = M_PI / 2;
+//			else if (real < 0.001 && imagined <0)
+//				value = -M_PI / 2;
+//			//if (real < 0.0001 && real >0)
+//			//	value = M_PI / 2;
+//			//if (real > -0.0001 && real < 0)
+//			//	value = -M_PI / 2;
+//			value = ((value + (M_PI / 2)))*255/M_PI;
+//			//value = (value + M_PI) * (255 / (2 * M_PI));
+//
+//			SetPixel8(x, y, Floor((int)value));
+//		}
+//	}
+//}
+
 void myImage::FourierFaza()
 {
 	Hamming();
@@ -1935,35 +2036,12 @@ void myImage::FourierFaza()
 			double real = fourierReordered[uv].first;
 			double imagined = fourierReordered[uv].second;
 
-			//std::complex<double> complexNumber(real, imagined);
-			//value = arg(complexNumber);
+			std::complex<double> complexNumber(real, imagined);
+			value = arg(complexNumber);
 
-			//if (real < 0.0001 && real >0)
-			//	real = M_PI / 2;
-			//if (real > -0.0001 && real < 0)
-			//	real = -M_PI / 2;
+			value = (value + M_PI) * (255 / (2 * M_PI));
 
-			double tangensValue = imagined / real;
-			//if (tangensValue > 0) {
-			value = atan(tangensValue);
-			//}
-			//else {
-			//	value = atan(tangensValue) + M_PI;
-			//}
-
-			//if (real < 0.001 && imagined >0)
-			//	value = M_PI / 2;
-			//else if (real < 0.001 && imagined <0)
-			//	value = -M_PI / 2;
-			if (real < 0.0001 && real >0)
-				value = M_PI / 2;
-			if (real > -0.0001 && real < 0)
-				value = -M_PI / 2;
-
-			//value = ((value+M_PI/2) * 255 / 3); 
-			value = ((value + (M_PI / 2)) / M_PI)*255;
-
-			SetPixel8(x, y, Floor((float)value));
+			SetPixel8(x, y, Floor((int)value));
 		}
 	}
 }
