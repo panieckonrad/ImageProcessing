@@ -2055,7 +2055,6 @@ void myImage::FourierAmplituda()
 {
 	Hamming();
 	double pixel;
-	//typedef pair<int, int> uv;
 	typedef pair<double, double> ComplexNumber;
 	double value = 0;
 	double valueReal = 0.0;
@@ -2121,7 +2120,7 @@ void myImage::FourierAmplituda()
 	}
 
 	vector <double> v;
-	int max = -99999;
+	double max = -99999;
 	for (int y = 0; y < fileHeight; y++)
 	{
 		for (int x = 0; x < fileWidth; x++)
@@ -2224,9 +2223,9 @@ void myImage::FourierFaza()
 			double imagined = fourierReordered[y*fileWidth+x].second;
 
 			if (real < 0.001 && imagined >0)
-				value = M_PI / 2;
+				value = M_PI ;
 			else if (real < 0.001 && imagined < 0)
-				value = -M_PI / 2;
+				value = -M_PI ;
 			else
 				value = atan2(imagined, real);
 
