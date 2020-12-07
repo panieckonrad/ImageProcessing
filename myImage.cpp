@@ -1679,7 +1679,7 @@ void myImage::FourierAmplituda()
 				{
 					result = 2 * M_PI * (float)((float)(u * x) / (float)fileWidth + (float)(v * y) / (float)fileHeight);
 					pixel = GetPixel8(x, y);
-					valueReal += (pixel * (cos(result)));
+					valueReal += (pixel * cos(result));
 					valueImagined -= (pixel * sin(result));
 				}
 			}
@@ -1691,7 +1691,7 @@ void myImage::FourierAmplituda()
 	double w = fileWidth / 2;
 	double h = fileHeight / 2;
 
-	for (int y = 0; y < fileHeight; y++) // PRZENOSZENIE CWIARTEK
+	for (int y = 0; y < fileHeight; y++) 
 	{
 		for (int x = 0; x < fileWidth; x++)
 		{
@@ -1775,7 +1775,7 @@ void myImage::FourierFaza()
 				{
 					result = 2 * M_PI * (float)((float)(u * x) / (float)fileWidth + (float)(v * y) / (float)fileHeight);
 					pixel = GetPixel8(x, y);
-					valueReal += (pixel * (cos(result)));
+					valueReal += (pixel * cos(result));
 					valueImagined -= (pixel * sin(result));
 				}
 			}
@@ -1787,7 +1787,7 @@ void myImage::FourierFaza()
 	double w = fileWidth / 2;
 	double h = fileHeight / 2;
 
-	for (int y = 0; y < fileHeight; y++) // PRZENOSZENIE CWIARTEK
+	for (int y = 0; y < fileHeight; y++) 
 	{
 		for (int x = 0; x < fileWidth; x++)
 		{
@@ -1825,8 +1825,8 @@ void myImage::FourierFaza()
 			double real = fourierReordered[y*fileWidth+x].first; // czesc rzeczywista
 			double imagined = fourierReordered[y*fileWidth+x].second; // czesc urojona
 
-			if (real < 0.001 && imagined >0)
-				value = M_PI ;
+			if (real < 0.001 && imagined > 0)
+				value = M_PI ; // DLA M_PI/2 POWSTAJE OBRAZ W SKALI SZAROSCI , DLA M_PI Bardziej kontrastowy.
 			else if (real < 0.001 && imagined < 0)
 				value = -M_PI ;
 			else
