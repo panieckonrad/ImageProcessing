@@ -48,6 +48,7 @@ BOOL CImgWnd::Create(const RECT& rect, CWnd*  pParentWnd, UINT nID)
 	CBitmap memBM;
 	memBM.CreateCompatibleBitmap(pDC, rect.right - rect.left, rect.bottom - rect.top);  // szerokosc i wysokosc okna imgWnd to 400
 	dcMemory.SelectObject(memBM);
+
 	ReleaseDC(pDC);
 
 	return bRes;
@@ -72,27 +73,6 @@ void CImgWnd::OnPaint()
 
 }
 
-
-//void CImgWnd::OnMouseMove(UINT nFlags, CPoint point)
-//{
-//	// TODO: Add your message handler code here and/or call default
-//
-//	if ((nFlags & MK_LBUTTON) == MK_LBUTTON)
-//	{
-//		x1 = point.x;
-//		y1 = point.y;
-//		CClientDC dc(this);
-//		CPen rPen(PS_SOLID, 2, RGB(255, 0, 0));
-//		dc.SelectObject(&rPen);
-//		dc.MoveTo(0, 0);
-//		dc.LineTo(x1, y1);
-//	}
-//
-//
-//}
-
-
-
 void CImgWnd::OnRButtonDown(UINT nFlags, CPoint point){
 
 	if (firstClickR) {
@@ -103,15 +83,6 @@ void CImgWnd::OnRButtonDown(UINT nFlags, CPoint point){
 	else {
 		rx2 = point.x;
 		ry2 = point.y;
-		CClientDC dc(this);
-		Color color;
-		if ((nFlags & MK_SHIFT) == MK_SHIFT) { // if shift pressed
-			color = Color(70, 255, 0, 0); //red
-		}
-		else {
-			color = Color(70, 0, 255, 0); // if shift not pressed green
-		}
-		Gdiplus::Graphics g(dc.GetSafeHdc());
 		int width = rx2 - rx1;
 		int height = ry2 - ry1;
 		int topX = rx1;
@@ -122,10 +93,34 @@ void CImgWnd::OnRButtonDown(UINT nFlags, CPoint point){
 		if (height < 0) {
 			topY = ry1 + height;
 		}
+		CClientDC dc(this);
+		Color color;
+		if ((nFlags & MK_SHIFT) == MK_SHIFT) { // if shift pressed
+			color = Color(70, 255, 0, 0); //red
+
+			for (int y = topY; y < abs(height); y++) {
+				for (int x = topX; x < abs(width); x++) {
+					dcMemory.SetPixel(x, y, 0);
+				}
+			}
+		}
+		else {
+			color = Color(70, 0, 255, 0); // if shift not pressed green
+
+			for (int y = topY; y < abs(height); y++) {
+				for (int x = topX; x < abs(width); x++) {
+					dcMemory.SetPixel(x, y, 1);
+				}
+			}
+		}
+		Gdiplus::Graphics g(dc.GetSafeHdc());
+		
 		Gdiplus::Rect rectangle(topX,topY,abs(width), abs(height));
 		SolidBrush solidBrush(color);
 		g.FillRectangle(&solidBrush, rectangle);
 		firstClickR = true;
+
+
 	}
 }
 
@@ -140,15 +135,6 @@ void CImgWnd::OnLButtonDown(UINT nFlags, CPoint point)
 	else {
 		lx2 = point.x;
 		ly2 = point.y;
-		CClientDC dc(this);
-		Color color;
-		if ((nFlags & MK_SHIFT) == MK_SHIFT) { // if shift pressed
-			color = Color(70, 255, 0, 0); //red
-		}
-		else { // if shift not pressed
-			color = Color(70, 0, 255, 0);// green
-		}
-		Gdiplus::Graphics g(dc.GetSafeHdc());
 		int width = lx2 - lx1;
 		int height = ly2 - ly1;
 		int topX = lx1;
@@ -159,23 +145,55 @@ void CImgWnd::OnLButtonDown(UINT nFlags, CPoint point)
 		if (height < 0) {
 			topY = ly1 + height;
 		}
+		CClientDC dc(this);
+		Color color;
+		if ((nFlags & MK_SHIFT) == MK_SHIFT) { // if shift pressed
+			color = Color(70, 255, 0, 0); //red
+
+			for (int y = topY; y < abs(height); y++) {
+				for (int x = topX; x < abs(width); x++) {
+					dcMemory.SetPixel(x, y, 0);
+				}
+			}
+		}
+		else { // if shift not pressed
+			color = Color(70, 0, 255, 0);// green
+
+			for (int y = topY; y < abs(height); y++) {
+				for (int x = topX; x < abs(width); x++) {
+					dcMemory.SetPixel(x, y, 1);
+				}
+			}
+		}
+		Gdiplus::Graphics g(dc.GetSafeHdc());
+		
 		Gdiplus::Rect rectangle(topX, topY, abs(width), abs(height));
 		SolidBrush solidBrush(color);
 		g.FillEllipse(&solidBrush, rectangle);
 		firstClickL = true;
+
+
 	}
 }
 
 
-void CImgWnd::OnLButtonDblClk(UINT nFlags, CPoint point)
+void CImgWnd::OnLButtonDblClk(UINT nFlags, CPoint point) // wysczysc wszystkie obszary i ustaw ze bierzemy wszystko
 {
 	CClientDC dc(this);
+	CRect r;
+	GetClientRect(r);
 	InvalidateRect(NULL);
+
+	for (int x = 0; x < r.Width(); x++) {
+		for (int y = 0; y < r.Height();y++) {
+			dcMemory.SetPixel(x, y, 1); // wyczysc wszystkie obszary, wiec wszystko bierzemy
+		}
+	}
 	firstClickL = true;
 }
 
 
-void CImgWnd::OnRButtonDblClk(UINT nFlags, CPoint point)
+void CImgWnd::OnRButtonDblClk(UINT nFlags, CPoint point) // wyklucz wszystkie obszary
 {
 	CClientDC dc(this);
 	Gdiplus::Graphics g(dc.GetSafeHdc());
@@ -185,5 +203,12 @@ void CImgWnd::OnRButtonDblClk(UINT nFlags, CPoint point)
 	Color color(70, 255, 0, 0);
 	SolidBrush solidBrush(color);
 	g.FillRectangle(&solidBrush, rect);
+
+
+	for (int x = 0; x < r.Width(); x++) {
+		for (int y = 0; y < r.Height();y++) {
+			dcMemory.SetPixel(x, y, 0); // wyzeruj cala maske
+		}
+	}
 	firstClickR = true;
 }

@@ -2219,8 +2219,8 @@ void myImage::FourierFaza()
 	{
 		for (int x = 0; x < fileWidth; x++)
 		{
-			double real = fourierReordered[y*fileWidth+x].first;
-			double imagined = fourierReordered[y*fileWidth+x].second;
+			double real = fourierReordered[y*fileWidth+x].first; // czesc rzeczywista
+			double imagined = fourierReordered[y*fileWidth+x].second; // czesc urojona
 
 			if (real < 0.001 && imagined >0)
 				value = M_PI ;
