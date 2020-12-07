@@ -46,8 +46,13 @@ BOOL CImgWnd::Create(const RECT& rect, CWnd*  pParentWnd, UINT nID)
 	CDC* pDC = GetDC();
 	dcMemory.CreateCompatibleDC(pDC); //dcMemory to pole typu CDC 
 	CBitmap memBM;
-	memBM.CreateCompatibleBitmap(pDC, rect.right - rect.left, rect.bottom - rect.top);  // szerokosc i wysokosc okna imgWnd to 400
+	memBM.CreateCompatibleBitmap(pDC, rect.right - rect.left, rect.bottom - rect.top);  // szerokosc i wysokosc okna imgWnd to 600 x 650
 	dcMemory.SelectObject(memBM);
+	for (int i = 0; i < (rect.right - rect.left); i++) {
+		for (int j = 0; j < (rect.bottom - rect.top); j++) {
+			dcMemory.SetPixel(i, j, 1);
+		}
+	}
 
 	ReleaseDC(pDC);
 
@@ -68,9 +73,6 @@ void CImgWnd::OnPaint()
 	CRect r;
 	GetClientRect(r);
 	Image.PaintDIB(kontekst, r);
-
-
-
 }
 
 void CImgWnd::OnRButtonDown(UINT nFlags, CPoint point){
