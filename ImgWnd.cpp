@@ -219,13 +219,13 @@ void CImgWnd::MomentyClickL(UINT nFlags, CPoint point) {
 		if ((xp >= 0 && xp < fileWidth) && (yp >= 0 && yp <= fileHeight)) { // na wszelki wypadek
 			momenty = Image.Momenty(xp,yp);
 		}
-		InvalidateRect(NULL);
-		if (!momenty.empty()) {
+		if (!momenty.empty()){
 			CString strBuffer;
 			strBuffer.Format(_T("u00 = %f \n u10 = %f \n u01 = %f \n u20 = %f \n u02 = %f \n u11 = %f \n deg = %f"), 
 				momenty[0], momenty[1], momenty[2], momenty[3], momenty[4], momenty[5], momenty[6]);
 			MessageBox(strBuffer);
 		}
+		InvalidateRect(NULL);
 	}
 
 

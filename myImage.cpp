@@ -1983,9 +1983,9 @@ vector<double> myImage::Momenty(int x, int y) {
 	}
 	// KONIEC WYLICZANIA PIKSELI NALEZACYCH DO OBIEKTU
 
-	for (auto o : objects) {
-		SetPixel8(o.x, o.y, 50);
-	}
+	//for (auto o : objects) {
+	//	SetPixel8(o.x, o.y, 50);
+	//}
 
 	// WYLICZANIE MOMENTOW
 
