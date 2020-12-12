@@ -1,4 +1,8 @@
 #pragma once
+
+struct pixel_hash;
+struct pixel;
+
 class myImage
 {			
 
@@ -72,5 +76,9 @@ public:
 	void Hamming();
 	void FourierAmplituda();
 	void FourierFaza();
+
+	//LAB9
+	void LBP();
+	void Momenty(int x, int y);
 };
 

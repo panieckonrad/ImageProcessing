@@ -56,7 +56,7 @@ void HistogramWindow::OnPaint()
 	}
 
 	// rysowanie progu
-	if (threshold != -1) {
+	if (threshold != -2) {
 		dc.MoveTo(10 + 5 * threshold, r.Height() - 10);
 		int nsave = dc.SaveDC();
 		CPen penRed(PS_SOLID, 1, RGB(255, 0, 0));

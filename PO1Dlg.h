@@ -29,7 +29,7 @@ protected:
 	CImgWnd m_imgIN;
 	CImgWnd m_imgOUT;
 
-	CComboBox m_combo1;
+
 
 	int parameter = 1; // parameter equals to 1 by default
 	// Generated message map functions
@@ -45,6 +45,7 @@ public:
 	afx_msg void OnBnClickedButtonSave();
 	afx_msg void OnBnClickedButtonParams();
 	CSliderCtrl slider; // kontrolka slidero
+	CComboBox m_combo1;// combobox
 	afx_msg void OnNMCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCbnSelchangeCombo1();
 };

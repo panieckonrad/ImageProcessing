@@ -1,0 +1,3 @@
+Aby rysowac, nalezy wczytac obraz, wyswietlic Fouriera, 
+kliknac myszka jeden punkt, nastepnie kliknac drugi punkt.
+Obszary sa zapisywane do bitmapy 0 1 .

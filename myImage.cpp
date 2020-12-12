@@ -4,6 +4,7 @@
 #include "HistogramWindow.h"
 #include <vector>
 #include <map>
+
 using namespace std;
 
 myImage::myImage()
@@ -508,7 +509,7 @@ int myImage::OtsuSegmentation() {
 
 	int t_star = 0;
 	for (int t = 0; t < 256; t++) {
-		if ((1 / sigma[t]) > (1 / sigma[t_star])) // jesli wartosc funkcji dla progu t jest wieksza od wartoscu dotychczasowego maxa
+		if ((1 / sigma[t]) > (1 / sigma[t_star])) // jesli wartosc funkcji dla progu t jest wieksza od wartosci dotychczasowego maxa
 			t_star = t;
 	}
 
@@ -595,7 +596,7 @@ void myImage::MedianFilter(int value, int option) { //option 0 3x3 option , opti
 				for (int i = -maskOffset; i < maskOffset+1; i++) { 
 					for (int j = -maskOffset; j <  maskOffset+1; j++) {
 						int pixel;
-						if (x - i < 0 || x - i >= fileWidth || y - j < 0 || y - j >= fileHeight) {
+						if (x - i < 0  || x - i >= fileWidth || y - j < 0 || y - j >= fileHeight) {
 							pixel = GetPixel8(x, y);
 						}
 						else {
@@ -1837,4 +1838,183 @@ void myImage::FourierFaza()
 			SetPixel8(x, y, Floor((int)value));
 		}
 	}
+}
+
+void myImage::LBP() {
+	int w = fileWidth;
+	int h = fileHeight;
+
+	BYTE** newValues = new BYTE * [fileHeight];
+	for (int i = 0; i < fileHeight; i++)
+		newValues[i] = new BYTE[fileWidth];
+
+	int sum, centerBrightness;
+	int wx, wy = 0;
+	for (int y = 1; y < h - 1; y++)
+	{
+		for (int x = 1; x < w - 1; x++)
+		{
+			sum = 0;
+			centerBrightness = GetPixel8(x, y);
+			for (int exponent = 0; exponent < 8; exponent++) { // od dolu centrum na prawo (przeciwnie do kierunku wskazowek zegara)
+				if (exponent == 0) { // dol
+					wx = 0;
+					wy = -1;
+				}
+				else if (exponent == 1) {
+					wx = 1;
+					wy = -1; // prawo dol
+				}
+				else if (exponent == 2) {
+					wx = 1;
+					wy = 0; // prawo
+				}
+				else if (exponent == 3) {
+					wx = 1;
+					wy = 1;
+				}
+				else if (exponent == 4) {
+					wx = 0;
+					wy = 1;
+				}
+				else if (exponent == 5) {
+					wx = -1;
+					wy = 1;
+				}
+				else if (exponent == 6) {
+					wx = -1;
+					wy = 0;
+				}
+				else { // potega 7 
+					wx = -1;
+					wy = -1;
+				}
+				if ((GetPixel8(x + wx, y + wy) - centerBrightness) >= 0) { // (in - ic) >= 0 ----> u>=0
+					sum += pow(2, exponent);
+				}
+			}
+			newValues[y][x] = sum;
+		}
+	}
+
+	for (int y = 1; y < h - 1; y++) {
+		for (int x = 1; x < w - 1; x++) {
+			SetPixel8(x, y, newValues[y][x]);
+		}
+	}
+}
+
+struct pixel {
+	int x, y;
+	bool operator==(const pixel& b) const
+	{
+		return (x == b.x && y == b.y);
+	}
+};
+
+struct pixel_hash
+{
+	std::size_t operator() (const pixel p) const
+	{
+		return std::hash<int>()(p.x) ^ std::hash<int>()(p.y);
+	}
+};
+
+#include <queue>
+#include <unordered_map>
+#include <unordered_set>
+
+void myImage::Momenty(int x, int y) {
+	//WYLICZANIE PIKSELI NALEZACYCH DO OBIEKTU
+	int w = fileWidth;
+	int h = fileHeight;
+	y = h - y; // odwroc os y
+
+	int color = GetPixel8(x, y);
+	if ((int)GetPixel8(x, y) == 255) { // jesli nalezy do tla wyjdz
+		return ;
+	}
+
+	std::queue <pixel> q;
+	std::unordered_map <pixel, pixel, pixel_hash> przetworzone;
+	std::unordered_set <pixel, pixel_hash> objects;
+
+	pixel first;
+	first.x = x;
+	first.y = y;
+	q.push(first);
+
+	while (!q.empty()) {
+		pixel p = q.front();
+		q.pop();
+
+		pixel c; // piksel current od ktorego bierzemy sasiadow
+		c.x = p.x;
+		c.y = p.y;
+		objects.insert(p);//zapisz w liscie punktow
+
+		// dodaj do q prawego sasiada
+		p.x = c.x + 1;
+		if ((przetworzone.find(p) == przetworzone.end()) && (p.x >=0 && p.x < fileWidth) && (p.y >=0 && p.y <fileHeight) && (int)GetPixel8(p.x, p.y) == 0) { // jesli nieprzetworzony && w granicach obrazu && czarny
+			q.push(p);
+			przetworzone[p] = p;
+		}
+
+		// dodaj do q lewego sasiada
+		p.x = c.x - 1;
+		if ((przetworzone.find(p) == przetworzone.end()) && (p.x >= 0 && p.x < fileWidth) && (p.y >= 0 && p.y < fileHeight) && (int)GetPixel8(p.x, p.y) == 0) { // jesli nieprzetworzony && w granicach obrazu && czarny
+			q.push(p);
+			przetworzone[p] = p;
+		}
+		// dodaj do q gornego sasiada
+		p.x = c.x;
+		p.y = c.y + 1;
+		if ((przetworzone.find(p) == przetworzone.end()) && (p.x >= 0 && p.x < fileWidth) && (p.y >= 0 && p.y < fileHeight) && (int)GetPixel8(p.x, p.y) == 0) { // jesli nieprzetworzony && w granicach obrazu && czarny
+			q.push(p);
+			przetworzone[p] = p;
+		}
+		// dodaj do q dolnego sasiada
+		p.x = c.x;
+		p.y = c.y - 1;
+		if ((przetworzone.find(p) == przetworzone.end()) && (p.x >= 0 && p.x < fileWidth) && (p.y >= 0 && p.y < fileHeight) && (int)GetPixel8(p.x, p.y) == 0) { // jesli nieprzetworzony && w granicach obrazu && czarny
+			q.push(p);
+			przetworzone[p] = p;
+		}
+	}
+	// KONIEC WYLICZANIA PIKSELI NALEZACYCH DO OBIEKTU
+
+	for (auto o : objects) {
+		SetPixel8(o.x, o.y, 50);
+	}
+
+	// WYLICZANIE MOMENTOW
+
+	double u00 = objects.size(); // pierwszy moment
+
+	double u10 = 0;
+	double u01 = 0;
+	for (auto o : objects) {
+		u10 += o.x; 
+		u01 += o.y;
+	}
+	u10 = u10 / u00;
+	u01 = u01 / u00;
+
+	double u20 = 0;
+	double u02 = 0;
+	double u11 = 0;
+
+	for (auto o : objects) {
+		u20 += (o.x - u10) * (o.x - u10);
+		u02 += (o.y - u01) * (o.y - u01);
+		u11 += (o.x - u10) * (o.y - u01);
+	}
+	u20 = u20 / u00;
+	u02 = u02 / u00;
+	u11 = u11 / u00;
+
+	double deg = atan2(2 * u11, u20 - u02)/2;
+	deg = deg * 180 / M_PI;
+	
+
 }

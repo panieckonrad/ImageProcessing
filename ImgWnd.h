@@ -26,7 +26,8 @@ public:
 	bool firstClickR = true;
 	bool firstClickL = true;
 
-protected:
+	//lab9
+	void *parent;
 	
 
 protected:
@@ -37,6 +38,9 @@ public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnRButtonDblClk(UINT nFlags, CPoint point);
+
+	void FourierClickL(UINT nFlags, CPoint point);
+	void MomentyClickL(UINT nFlags, CPoint point);
 };
 
 

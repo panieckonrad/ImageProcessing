@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "PO1.h"
 #include "ImgWnd.h"
+#include "PO1Dlg.h"
 
 
 // CImgWnd
@@ -28,6 +29,7 @@ BEGIN_MESSAGE_MAP(CImgWnd, CWnd)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
 	ON_WM_RBUTTONDBLCLK()
+	ON_CBN_SELCHANGE(IDC_COMBO1, &CPODlg::OnCbnSelchangeCombo1)
 END_MESSAGE_MAP()
 
 
@@ -54,6 +56,9 @@ BOOL CImgWnd::Create(const RECT& rect, CWnd*  pParentWnd, UINT nID)
 		}
 	}
 
+	//lab9
+	parent = (CPODlg*)pParentWnd;
+
 	ReleaseDC(pDC);
 
 	return bRes;
@@ -62,13 +67,14 @@ BOOL CImgWnd::Create(const RECT& rect, CWnd*  pParentWnd, UINT nID)
 
 void CImgWnd::OnPaint()
 {
-	if (!doPaint) { 
-		return;
-	}
+
 
 	CPaintDC dc(this); // device context for painting
 	//
 	//// Do not call CWnd::OnPaint() for painting messages
+	if (!doPaint) {
+		return;
+	}
 	HDC kontekst = dc.GetSafeHdc();
 	CRect r;
 	GetClientRect(r);
@@ -116,8 +122,8 @@ void CImgWnd::OnRButtonDown(UINT nFlags, CPoint point){
 			}
 		}
 		Gdiplus::Graphics g(dc.GetSafeHdc());
-		
-		Gdiplus::Rect rectangle(topX,topY,abs(width), abs(height));
+
+		Gdiplus::Rect rectangle(topX, topY, abs(width), abs(height));
 		SolidBrush solidBrush(color);
 		g.FillRectangle(&solidBrush, rectangle);
 		firstClickR = true;
@@ -126,9 +132,7 @@ void CImgWnd::OnRButtonDown(UINT nFlags, CPoint point){
 	}
 }
 
-
-void CImgWnd::OnLButtonDown(UINT nFlags, CPoint point)
-{
+void CImgWnd::FourierClickL(UINT nFlags, CPoint point) {
 	if (firstClickL) {
 		lx1 = point.x;
 		ly1 = point.y;
@@ -168,14 +172,54 @@ void CImgWnd::OnLButtonDown(UINT nFlags, CPoint point)
 			}
 		}
 		Gdiplus::Graphics g(dc.GetSafeHdc());
-		
+
 		Gdiplus::Rect rectangle(topX, topY, abs(width), abs(height));
 		SolidBrush solidBrush(color);
 		g.FillEllipse(&solidBrush, rectangle);
 		firstClickL = true;
-
-
 	}
+}
+
+void CImgWnd::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	//FourierClickL(nFlags, point); // lab8, gryzie sie z lab9
+	MomentyClickL(nFlags, point);
+}
+
+void CImgWnd::MomentyClickL(UINT nFlags, CPoint point) {
+	if (doPaint) { // jesli juz wczytalismy obraz
+		CRect r;
+		GetClientRect(&r);
+		int x = 0, y = 0; // pozycja x i y w oknie
+		int xp = 0, yp = 0; // pozycja x i y w prawidlowym obrazie
+		int szerokosc;
+		int wysokosc;
+		int fileWidth = Image.fileWidth;
+		int fileHeight = Image.fileHeight;
+
+		//skalowanie z paintdib(), potrzebny nam offset
+		if (fileWidth > fileHeight) { // jesli szerokosc wieksza niz wysokosc to skalujemy wysokosc
+			szerokosc = r.Width();
+			wysokosc = (float)fileHeight / (float)fileWidth * (float)(r.Height());
+			y = (r.Height() - wysokosc) / 2;
+		}
+		else { // w przeciwnym wypadku szerokosc
+			wysokosc = r.Height();
+			szerokosc = (float)fileWidth / (float)fileHeight * (float)(r.Width());
+			x = (r.Width() - szerokosc) / 2;
+		}
+
+		xp = point.x - x; // przesuwamy aby trafic w prawdziwy obraz
+		yp = point.y - y;
+		xp = xp * fileWidth / szerokosc; // dostosowujemy indeks z imgWnd do prawidlowego indeksu w obrazie
+		yp = yp * fileHeight / wysokosc;
+
+		if ((xp >= 0 && xp < fileWidth) && (yp >= 0 && yp <= fileHeight)) { // na wszelki wypadek
+			Image.Momenty(xp,yp);
+		}
+	}
+	InvalidateRect(NULL);
+
 }
 
 

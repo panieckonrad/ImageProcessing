@@ -167,6 +167,7 @@ BOOL CPODlg::OnInitDialog()
 	m_combo1.AddString(L"lab8_hamming");
 	m_combo1.AddString(L"lab8_fourier faza");
 	m_combo1.AddString(L"lab8_fourier amplituda");
+	m_combo1.AddString(L"lab9_LBP");
 
 
 
@@ -439,7 +440,14 @@ void CPODlg::OnBnClickedButtonProcess()
 	m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
 	m_imgOUT.Image.FourierFaza();
 	}
-	
+	else if (sOption == L"lab9_LBP") {
+	m_imgOUT.Image.CreateGreyscaleDIB(NULL, 0, 0);
+	m_imgOUT.Image.LBP();
+	m_imgOUT.Image.CalculateHistogram(0, 0, m_imgOUT.Image.fileWidth, m_imgOUT.Image.fileHeight);
+	m_imgOUT.Image.ShowHistogram(-2);
+	}
+	else if (sOption == L"lab9_momenty") {
+	}
 	InvalidateRect(NULL);
 }
 
@@ -449,10 +457,11 @@ void CPODlg::OnBnClickedButtonSave()
 	WCHAR strFilter[] = { L"Image Files (*.bmp)|*.bmp|All Files (*.*)|*.*||" };
 
 	CFileDialog FileDlg(FALSE, NULL, NULL, 0, strFilter);
+	//MessageBox(L"Now what?", L";-)");
 
 	if (FileDlg.DoModal() == IDOK)
 	{
-		//MessageBox(L"Now what?", L";-)");
+
 		CString fileName = FileDlg.GetPathName();
 		fileName += ".bmp";
 		m_imgOUT.Image.SaveDIB(fileName);
