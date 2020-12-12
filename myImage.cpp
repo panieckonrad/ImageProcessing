@@ -2,7 +2,6 @@
 #include "myImage.h"
 #include "Math.h"
 #include "HistogramWindow.h"
-#include <vector>
 #include <map>
 
 using namespace std;
@@ -1924,7 +1923,7 @@ struct pixel_hash
 #include <unordered_map>
 #include <unordered_set>
 
-void myImage::Momenty(int x, int y) {
+vector<double> myImage::Momenty(int x, int y) {
 	//WYLICZANIE PIKSELI NALEZACYCH DO OBIEKTU
 	int w = fileWidth;
 	int h = fileHeight;
@@ -1932,7 +1931,8 @@ void myImage::Momenty(int x, int y) {
 
 	int color = GetPixel8(x, y);
 	if ((int)GetPixel8(x, y) == 255) { // jesli nalezy do tla wyjdz
-		return ;
+		vector <double> v;
+		return v; // return empty vector
 	}
 
 	std::queue <pixel> q;
@@ -2015,6 +2015,13 @@ void myImage::Momenty(int x, int y) {
 
 	double deg = atan2(2 * u11, u20 - u02)/2;
 	deg = deg * 180 / M_PI;
-	
-
+	vector<double>v;
+	v.push_back(u00);
+	v.push_back(u10);
+	v.push_back(u01);
+	v.push_back(u20);
+	v.push_back(u02);
+	v.push_back(u11);
+	v.push_back(deg);
+	return v;
 }

@@ -1,5 +1,5 @@
 #pragma once
-
+#include <vector>
 struct pixel_hash;
 struct pixel;
 
@@ -79,6 +79,6 @@ public:
 
 	//LAB9
 	void LBP();
-	void Momenty(int x, int y);
+	std::vector<double> Momenty(int x, int y);
 };
 
